@@ -29,7 +29,8 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
     campaign.creator = ctx.accounts.signer.key();
     campaign.max_rewards_per_game = max_rewards_per_game;
     campaign.rewards_claim_fee = player_claim_price;
-
+    campaign.rewards_available = fund_amount;
+    campaign.init_funding = fund_amount;
     let clock = Clock::get()?;
     let ts_now = clock.unix_timestamp;
     campaign.slot_created = clock.slot;

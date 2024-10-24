@@ -26,6 +26,7 @@ pub fn end_game_with_nft(ctx: Context<EndGameWithNft>, amount_won: u64) -> Resul
             }
         }
    } 
+   let pre_balance = ctx.accounts.reward_vault.amount;
    if amount_won > 0 {
         if amount_won > ctx.accounts.campaign.max_rewards_per_game {return err!(ErrorCodes::AmountTooHigh)}
    
@@ -58,7 +59,12 @@ pub fn end_game_with_nft(ctx: Context<EndGameWithNft>, amount_won: u64) -> Resul
     campaign_player.games_played += 1;
     ctx.accounts.campaign.active_games = ctx.accounts.campaign.active_games.saturating_sub(1);
     ctx.accounts.campaign.total_games +=1;
+    ctx.accounts.campaign.rewards_available = pre_balance - amount_won;
 
+    ctx.accounts.campaign.reserved_rewards -= ctx.accounts.campaign.max_rewards_per_game;
+    if ctx.accounts.campaign.init_funding == 0 {
+        ctx.accounts.campaign.init_funding = ctx.accounts.campaign.rewards_available;
+    }
     Ok(())
 }
 
@@ -66,7 +72,7 @@ pub fn end_game_with_nft(ctx: Context<EndGameWithNft>, amount_won: u64) -> Resul
 pub struct EndGameWithNft<'info> {
     #[account(mut)]
     pub house: Box<Account<'info, House>>,
-    #[account(mut, has_one=house)]
+    #[account(mut, has_one=house, has_one=reward_mint)]
     pub campaign: Box<Account<'info, Campaign>>,
     
 

@@ -48,7 +48,10 @@ pub struct Campaign {
     pub unclaimed_sol_fees: u64,
     pub _reserved_config: [u64; 7],
     pub token_config: Option<TokenCampaignConfig>,
-    pub _reserved_for_token: [u64; 7],
+    pub _reserved_for_token: [u64; 4],
+    pub init_funding: u64,
+    pub rewards_available: u64,
+    pub reserved_rewards: u64,
     pub slot_created: u64,
     pub campaign_name: String,
 }

@@ -8,24 +8,30 @@ use crate::{errors::ErrorCodes, Campaign, CampaignPlayer, House};
 
 pub fn start_game_with_nft(ctx: Context<StartGameWithNft>) -> Result<()> {
     let campaign_player = &mut ctx.accounts.campaign_player;
+    let campaign = &mut ctx.accounts.campaign;
+    let max_rewards = campaign.max_rewards_per_game;
     require!(!campaign_player.in_game, ErrorCodes::PlayerInGame);
-    if campaign_player.mint != ctx.accounts.player_nft_metadata.mint || campaign_player.campaign_slot != ctx.accounts.campaign.slot_created {
+    if campaign_player.mint != ctx.accounts.player_nft_metadata.mint || campaign_player.campaign_slot != campaign.slot_created {
         //new or reinitialized campaign player
-        campaign_player.set_inner(CampaignPlayer::new(&ctx.accounts.player_nft_metadata.mint, &ctx.accounts.campaign)?);
+        campaign_player.set_inner(CampaignPlayer::new(&ctx.accounts.player_nft_metadata.mint, &campaign)?);
         ctx.accounts.house.unique_players.add_assign(1);
-        ctx.accounts.campaign.player_count.add_assign(1);
+        campaign.player_count.add_assign(1);
     }
     let now_ts = Clock::get()?.unix_timestamp;
-    if ctx.accounts.campaign.time_span.is_expired(now_ts) {
+    if campaign.time_span.is_expired(now_ts) {
         return err!(errors::ErrorCodes::CampaignExpired);
     }
-    let current_energy = campaign_player.recharge_energy(&ctx.accounts.campaign.nft_config, now_ts)?;
+    let current_energy = campaign_player.recharge_energy(&campaign.nft_config, now_ts)?;
     msg!("current energy recharged to {}", current_energy);
     campaign_player.spend_energy(1);
     
     campaign_player.game_start_time = now_ts;
 
-    ctx.accounts.campaign.active_games.add_assign(1);
+    campaign.active_games.add_assign(1);
+    campaign.reserved_rewards.add_assign(max_rewards);
+    if campaign.reserved_rewards > campaign.rewards_available && campaign.init_funding > 0{
+       return  err!(ErrorCodes::RewardsUnavailable)
+    }
     campaign_player.in_game = true;
     Ok(())
 }
