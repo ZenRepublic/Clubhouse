@@ -1,5 +1,6 @@
-use crate::*;
 use anchor_lang::prelude::*;
+
+use crate::AddProgramAdmin;
 
 
 pub fn add_program_admin(ctx: Context<AddProgramAdmin>) -> Result<()> {

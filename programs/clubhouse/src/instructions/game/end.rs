@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{associated_token::AssociatedToken, metadata::MetadataAccount, token::{Mint, Token, TokenAccount}};
-use crate::{campaign, execute_lamport_transfer, execute_token_transfer, metadata_contains};
+use crate::{execute_lamport_transfer, execute_token_transfer, metadata_contains};
 
 use crate::{errors::ErrorCodes, Campaign, CampaignPlayer, House};
 
@@ -57,6 +57,8 @@ pub fn end_game_with_nft(ctx: Context<EndGameWithNft>, amount_won: u64) -> Resul
     }
     campaign_player.in_game = false;
     campaign_player.games_played += 1;
+    campaign_player.rewards_claimed += amount_won;
+
     ctx.accounts.campaign.active_games = ctx.accounts.campaign.active_games.saturating_sub(1);
     ctx.accounts.campaign.total_games +=1;
     ctx.accounts.campaign.rewards_available = pre_balance - amount_won;

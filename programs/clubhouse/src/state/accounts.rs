@@ -295,7 +295,8 @@ pub struct CampaignPlayer {
     pub in_game: bool,
     pub game: Option<Pubkey>,
     pub campaign_slot: u64,
-    _reserved: [u8; 24],
+    pub rewards_claimed: u64,
+    _reserved: [u8; 16],
 }
 
 impl CampaignPlayer {
@@ -316,7 +317,8 @@ impl CampaignPlayer {
             game: None,
             game_start_time: 0,
             campaign_slot: campaign.slot_created,
-            _reserved: [0; 24],
+            rewards_claimed: 0,
+            _reserved: [0; 16],
         })
     }
     

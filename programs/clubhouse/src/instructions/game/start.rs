@@ -2,7 +2,7 @@ use std::ops::AddAssign;
 
 use anchor_lang::prelude::*;
 use anchor_spl::{metadata::MetadataAccount, token::{Token, TokenAccount}};
-use crate::{campaign, errors, metadata_contains};
+use crate::{errors, metadata_contains};
 
 use crate::{errors::ErrorCodes, Campaign, CampaignPlayer, House};
 
