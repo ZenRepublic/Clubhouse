@@ -63,7 +63,8 @@ pub fn end_game_with_nft(ctx: Context<EndGameWithNft>, amount_won: u64) -> Resul
     ctx.accounts.campaign.total_games +=1;
     ctx.accounts.campaign.rewards_available = pre_balance - amount_won;
 
-    ctx.accounts.campaign.reserved_rewards -= ctx.accounts.campaign.max_rewards_per_game;
+    //TODO: fix 
+    ctx.accounts.campaign.reserved_rewards = ctx.accounts.campaign.reserved_rewards.saturating_sub(ctx.accounts.campaign.max_rewards_per_game);
     if ctx.accounts.campaign.init_funding == 0 {
         ctx.accounts.campaign.init_funding = ctx.accounts.campaign.rewards_available;
     }
