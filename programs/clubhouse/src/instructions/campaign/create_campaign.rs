@@ -7,7 +7,8 @@ use crate::{errors::{self, ErrorCodes}, execute_token_transfer, validate_string,
 
 
 pub fn create_campaign(ctx: Context<CreateCampaign>,
-    campaign_name: String, 
+    campaign_name: String,
+    uri: Option<String>,
     fund_amount: u64, 
     max_rewards_per_game: u64, 
     player_claim_price: u64, 
@@ -21,6 +22,7 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
     campaign.reward_mint_decimals = ctx.accounts.reward_mint.decimals;
     campaign.house = ctx.accounts.house.key();
     campaign.campaign_name = campaign_name;
+    campaign.uri = uri;
     campaign.house_config_snapshot = ctx.accounts.house.config.clone();
     campaign.nft_config = nft_energy_config;
     campaign.token_config = token_energy_config;
@@ -76,7 +78,7 @@ pub struct CreateCampaign<'info> {
     #[account(mut, constraint = signer.key() == house.house_admin)]
     pub signer: Signer<'info>,
 
-    #[account(init, payer=signer, space=9+496+24+campaign_name.len(), seeds=[b"campaign", campaign_name.as_bytes(), house.key().as_ref()], bump)]
+    #[account(init, payer=signer, space=9+496+4+campaign_name.len(), seeds=[b"campaign", campaign_name.as_bytes(), house.key().as_ref()], bump)]
     pub campaign: Account<'info, Campaign>,
 
     #[account(mut)]

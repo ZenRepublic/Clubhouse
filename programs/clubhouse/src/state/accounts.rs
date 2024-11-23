@@ -31,7 +31,7 @@ pub struct Club {
 
 #[account]
 pub struct Campaign {
-    pub bump: u8,
+    pub bump: u8, 
     pub house: Pubkey,
     pub creator: Pubkey,
     pub manager_mint: Option<Pubkey>,
@@ -54,6 +54,20 @@ pub struct Campaign {
     pub reserved_rewards: u64,
     pub slot_created: u64,
     pub campaign_name: String,
+    pub uri: Option<String>,
+}
+
+impl Campaign {
+    pub fn name_len_borsh(&self) -> usize {
+        4 + self.campaign_name.len()
+    }
+
+    pub fn custom_data_len_borsh(&self) -> usize {
+        1 + 
+        self.uri.as_ref().map_or(0, |s| {
+            4 + s.len()
+        })
+    }
 }
 
 #[account]

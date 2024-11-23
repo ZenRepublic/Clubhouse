@@ -35,8 +35,8 @@ pub mod clubhouse {
         program_admin::add::add_program_admin(ctx)
     }
 
-    pub fn create_campaign(ctx: Context<CreateCampaign>, campaign_name: String, fund_amount: u64, max_rewards_per_game: u64, player_claim_price: u64, time_span: TimeSpan, nft_config: Option<NftCampaignConfig>, token_config: Option<TokenCampaignConfig>) -> Result<()> {
-        campaign::create_campaign(ctx, campaign_name, fund_amount, max_rewards_per_game, player_claim_price, time_span, nft_config, token_config)
+    pub fn create_campaign(ctx: Context<CreateCampaign>, campaign_name: String, custom_data: Option<String>, fund_amount: u64, max_rewards_per_game: u64, player_claim_price: u64, time_span: TimeSpan, nft_config: Option<NftCampaignConfig>, token_config: Option<TokenCampaignConfig>) -> Result<()> {
+        campaign::create_campaign(ctx, campaign_name, custom_data, fund_amount, max_rewards_per_game, player_claim_price, time_span, nft_config, token_config)
     }
 
     pub fn close_campaign(ctx: Context<CloseCampaign>) -> Result<()> {
