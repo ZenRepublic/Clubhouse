@@ -4,7 +4,7 @@ pub mod campaign;
 pub mod game;
 
 use anchor_lang::{prelude::*, system_program};
-use anchor_spl::token::{self, Transfer};
+use anchor_spl::token_interface::{self, Transfer};
 
 
 pub fn execute_token_transfer<'a>(
@@ -15,13 +15,13 @@ pub fn execute_token_transfer<'a>(
     token_program: AccountInfo<'a>,
     signer_seeds: Option<&[&[&[u8]]]>
 ) -> Result<()>{
-    let accounts = anchor_spl::token::Transfer {
+    let accounts = anchor_spl::token_interface::Transfer {
         from,
         to,
         authority
     };
     let ctx: CpiContext<'_, '_, '_, '_, Transfer<'_>> = CpiContext::new(token_program, accounts);
-    token::transfer(match signer_seeds {
+    token_interface::transfer(match signer_seeds {
         Some(seeds) => ctx.with_signer(seeds),
         None => ctx,
     }, amount)
@@ -52,13 +52,13 @@ pub fn execute_token_close<'a>(
     token_program: AccountInfo<'a>,
     signer_seeds: Option<&[&[&[u8]]]>
 ) -> Result<()> {
-    let accounts = anchor_spl::token::CloseAccount {
+    let accounts = anchor_spl::token_interface::CloseAccount {
         account,
         destination,
         authority
     };
     let ctx = CpiContext::new(token_program, accounts);
-    token::close_account(match signer_seeds {
+    token_interface::close_account(match signer_seeds {
         Some(seeds) => ctx.with_signer(seeds),
         None => ctx,
     })
@@ -72,13 +72,13 @@ pub fn execute_token_burn<'a>(
     token_program: AccountInfo<'a>,
     signer_seeds: Option<&[&[&[u8]]]>
 ) -> Result<()> {
-    let accounts = anchor_spl::token::Burn {
+    let accounts = anchor_spl::token_interface::Burn {
         from,
         mint,
         authority
     };
     let ctx = CpiContext::new(token_program, accounts);
-    token::burn(match signer_seeds {
+    token_interface::burn(match signer_seeds {
         Some(seeds) => ctx.with_signer(seeds),
         None => ctx
     }, amount)

@@ -2,20 +2,28 @@ use crate::errors::ErrorCodes;
 use anchor_lang::prelude::*;
 use anchor_spl::metadata::MetadataAccount;
 
- pub fn metadata_contains(metadata: &MetadataAccount, pk: &Pubkey) -> bool {
+ pub fn metadata_contains(metadata: &MetadataAccount, pk: &Pubkey) -> Result<()> {
         let collection = &metadata.collection;
         if collection.is_some() && collection.as_ref().unwrap().verified && collection.as_ref().unwrap().key.eq(&pk)  {
-            return true;
+            return Ok(());
         }
         let creators = &metadata.creators;
         if creators.is_some() {
             for creator in creators.as_ref().unwrap() {
                 if creator.verified && creator.address.eq(&pk) {
-                    return true;
+                    return Ok(());
                 }
             }
         }
-        return false;
+        return err!(ErrorCodes::MetadataMismatch);
+    }
+    pub fn string_len_borsh(text: &String) -> usize {
+        4 + text.len()
+    }
+
+    pub fn string_option_len(text: &Option<String>) -> usize {
+        1 + 
+        text.as_ref().map_or(0, |s| string_len_borsh(s))
     }
 
    pub fn validate_string(s: &str) -> Result<()> {
@@ -66,25 +74,3 @@ use anchor_spl::metadata::MetadataAccount;
     }
     
 
-#[derive(AnchorDeserialize, AnchorSerialize, Clone, Copy, PartialEq, Eq, Debug)]
-pub struct TrainingConfig {
-    pub max_rewards_per_training: u64,
-    pub max_club_member_energy: u8,
-    pub energy_recharge_minutes: i64,
-    pub burn_remaining_tokens: bool,
-}
-
-#[derive(AnchorDeserialize, AnchorSerialize, Clone, Copy, PartialEq, Eq, Debug)]
-pub struct HouseConfig {
-    pub oracle_key: Pubkey,
-    pub campaign_creation_fee: u64,
-    pub campaign_manager_discount: u64,
-    pub claim_fee: u64,
-    pub rewards_tax: u64,
-}
-
-#[derive(AnchorDeserialize, AnchorSerialize, Clone, Copy, PartialEq, Eq, Debug)]
-pub struct MatchConfig {
-    pub win_tax_basis_points: u64,
-    pub match_min_deposit: u64,
-}

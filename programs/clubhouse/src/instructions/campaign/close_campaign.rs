@@ -13,15 +13,15 @@ pub fn close_campaign(ctx: Context<CloseCampaign>) -> Result<()> {
         ctx.accounts.reward_vault.amount,
         ctx.accounts.reward_vault.to_account_info(),
         ctx.accounts.reward_withdrawal_account.to_account_info(),
-        ctx.accounts.campaign.to_account_info(),
+        ctx.accounts.campaign_auth.to_account_info(),
         ctx.accounts.token_program.to_account_info(),
-        Some(&[&[b"campaign", ctx.accounts.campaign.campaign_name.as_bytes(), ctx.accounts.house.key().as_ref(), &[ctx.accounts.campaign.bump]]]))?;
+        Some(&[&[ctx.accounts.campaign.key().as_ref(), &[ctx.accounts.campaign.auth_bump]]]))?;
     execute_token_close(
         ctx.accounts.reward_vault.to_account_info(),
         ctx.accounts.creator.to_account_info(),
-        ctx.accounts.campaign.to_account_info(),
+        ctx.accounts.campaign_auth.to_account_info(),
         ctx.accounts.token_program.to_account_info(),
-        Some(&[&[b"campaign", ctx.accounts.campaign.campaign_name.as_bytes(), ctx.accounts.house.key().as_ref(), &[ctx.accounts.campaign.bump]]]))?;
+        Some(&[&[ctx.accounts.campaign.key().as_ref(), &[ctx.accounts.campaign.auth_bump]]]))?;
     Ok(())
 }
 
@@ -29,6 +29,9 @@ pub fn close_campaign(ctx: Context<CloseCampaign>) -> Result<()> {
 pub struct CloseCampaign<'info> {
     #[account(mut, close=creator, has_one=creator, has_one=house)]
     pub campaign: Box<Account<'info, Campaign>>,
+    /// CHECK: the campaign auth PDA
+    #[account()]
+    pub campaign_auth: AccountInfo<'info>,
     /// the account that deposits rewards for the campaign
     #[account(init_if_needed, 
         payer=creator, 

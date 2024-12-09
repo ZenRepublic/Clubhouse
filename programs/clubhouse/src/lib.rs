@@ -7,6 +7,7 @@ use state::*;
 use house::*;
 use campaign::*;
 use game::*;
+use program_admin::*;
 
 declare_id!("C1ubv5AC5w7Eh3iHpEt2BXZ1g3eARQtMRgmE2AXfznSg");
 
@@ -53,21 +54,5 @@ pub mod clubhouse {
 
 
 
-#[derive(Accounts)]
-pub struct AddProgramAdmin<'info> {
-    #[account(mut)]
-    pub signer: Signer<'info>,
-    ///CHECK: not relevant what type of account the admin is
-    pub program_admin: UncheckedAccount<'info>,
-    #[account(seeds=[crate::id().as_ref()], 
-        seeds::program=anchor_lang::solana_program::bpf_loader_upgradeable::id(), 
-        bump, 
-        constraint=program_data.upgrade_authority_address == Some(signer.key()) @ crate::errors::ErrorCodes::ProgramAuthorityMismatch
-    )]
-    pub program_data: Account<'info, ProgramData>,
-    #[account(init, payer=signer, space=8+64, seeds=[b"program_admin", program_admin.key().as_ref()], bump)]
-    pub program_admin_proof: Account<'info, ProgramAdminProof>,
-    pub system_program: Program<'info, System>,
-}
 
 }

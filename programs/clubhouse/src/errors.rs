@@ -10,6 +10,10 @@ pub enum ErrorCodes {
     CollectionKeyMismatch,
     #[msg("Caller does not own the token account")]
     TokenOwnerMismatch,
+    #[msg("Unexpected metadata account")]
+    UnexpectedMetadata,
+    #[msg("Expected metadata account, none provided")]
+    MissingMetadata,
     #[msg("Caller does not own the NFT")]
     OwnerBalanceMismatch,
     #[msg("Mint is not an NFT")]
@@ -34,17 +38,17 @@ pub enum ErrorCodes {
     NotClubAdmin,
     #[msg("Player already in a match")]
     PlayerAlreadyInMatch,
-    #[msg("Too low wager")]
-    TooLowWager,
-    #[msg("String starts with punctuation")]
+    #[msg("Player identity mismatch")]
+    PlayerIdentityMismatch,
+    #[msg("Name starts with punctuation")]
     StartsWithPunctuation,
-    #[msg("String starts with whitespace")]
+    #[msg("Name starts with whitespace")]
     StartsWithWhitespace,
-    #[msg("String ends with whitespace")]
+    #[msg("Name ends with whitespace")]
     EndsWithWhitespace,
-    #[msg("Invalid character in string")]
+    #[msg("Invalid character in name")]
     InvalidCharacter,
-    #[msg("Consecutive whitespace found")]
+    #[msg("Consecutive whitespace in name")]
     ConsecutiveWhitespace,
     #[msg("The string cannot be longer than 32 bytes")]
     StringTooLong,
@@ -58,6 +62,8 @@ pub enum ErrorCodes {
     ActiveCampaign,
     #[msg("Campaign is expired")]
     CampaignExpired,
+    #[msg("Invalid time span")]
+    InvalidTimeSpan,
     #[msg("Player is already in a game")]
     PlayerInGame,
     #[msg("Oracle required")]

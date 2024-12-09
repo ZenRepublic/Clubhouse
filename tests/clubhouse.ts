@@ -10,5 +10,6 @@ describe("clubhouse", () => {
 
   it("Is initialized!", async () => {
     const program = anchor.workspace.Clubhouse as Program<Clubhouse>;
+
   });
 });

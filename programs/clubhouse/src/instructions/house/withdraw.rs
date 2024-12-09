@@ -9,8 +9,8 @@ pub fn withdraw_house_fees(ctx: Context<WithdrawHouseFees>) -> Result<()> {
     let house = &mut ctx.accounts.house;
     let vault = &ctx.accounts.house_currency_vault;
     if vault.amount > 0 {
-        execute_token_transfer(vault.amount, 
-            ctx.accounts.house_currency_vault.to_account_info(), 
+        execute_token_transfer(vault.amount,
+            ctx.accounts.house_currency_vault.to_account_info(),
             ctx.accounts.admin_withdraw_account.to_account_info(), 
             house.to_account_info(), 
             ctx.accounts.token_program.to_account_info(), 

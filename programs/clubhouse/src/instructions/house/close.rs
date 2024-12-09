@@ -8,16 +8,14 @@ use crate::{execute_token_close, execute_token_transfer, state::House};
 pub fn close_house(ctx: Context<crate::CloseHouse>) -> Result<()> {
     let house = &mut ctx.accounts.house;
     if house.open_campaigns > 0 {
-        return Err(crate::errors::ErrorCodes::ActiveCampaigns.into());
+        return err!(crate::errors::ErrorCodes::ActiveCampaigns);
     }
-
-    house.teardown();
 
     let vault = &ctx.accounts.house_currency_vault;
     if vault.amount > 0 {
-        execute_token_transfer(vault.amount, 
+        execute_token_transfer(vault.amount,
             ctx.accounts.house_currency_vault.to_account_info(), 
-            ctx.accounts.admin_withdraw_account.to_account_info(), 
+            ctx.accounts.admin_withdraw_account.to_account_info(),
             house.to_account_info(), 
             ctx.accounts.token_program.to_account_info(), 
         Some(&[&[b"house",&house.house_name.as_bytes()[..], &[house.bump][..]]]))?;
