@@ -2,6 +2,7 @@ pub mod house;
 pub mod program_admin;
 pub mod campaign;
 pub mod game;
+pub mod player;
 
 use anchor_lang::{prelude::*, system_program};
 use anchor_spl::token_interface::{self, Transfer};

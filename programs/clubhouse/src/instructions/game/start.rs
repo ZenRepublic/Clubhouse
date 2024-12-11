@@ -2,11 +2,11 @@ use std::ops::AddAssign;
 
 use anchor_lang::{prelude::*, Owners};
 use anchor_spl::{metadata::MetadataAccount, token_interface::{Mint, TokenAccount, TokenInterface}};
-use crate::{errors, execute_token_burn, execute_token_transfer, metadata_contains, IdentityType, PlayerIdentity};
+use crate::{errors, execute_token_burn, execute_token_transfer, metadata_contains, IdentityType, PlayerIdentity, StakeInfo, TokenUse};
 
 use crate::{errors::ErrorCodes, Campaign, CampaignPlayer, House};
 
-pub fn start_game_with_nft(ctx: Context<StartGameWithNft>) -> Result<()> {
+pub fn start_game(ctx: Context<StartGame>) -> Result<()> {
 
     let inferred_identity = ctx.accounts.get_player_identity()?;
     let campaign = &mut ctx.accounts.campaign;
@@ -14,7 +14,7 @@ pub fn start_game_with_nft(ctx: Context<StartGameWithNft>) -> Result<()> {
 
     require!(!campaign_player.in_game, ErrorCodes::PlayerInGame);
 
-    if campaign_player.player_identity.identity_type == IdentityType::None || campaign_player.campaign_slot != campaign.slot_created {
+    if campaign_player.player_identity.identity_type == IdentityType::None {
         //new or reinitialized campaign player
         campaign_player.set_inner(CampaignPlayer::new(inferred_identity, &campaign)?);
         ctx.accounts.house.unique_players.add_assign(1);
@@ -38,7 +38,7 @@ pub fn start_game_with_nft(ctx: Context<StartGameWithNft>) -> Result<()> {
                       None)?;
                     
                     if token_config.token_use == crate::TokenUse::Stake {
-                        campaign_player.amount_staked += payment_amount;
+                        campaign_player.stake_info.as_mut().unwrap().amount.add_assign(payment_amount);
                     }
                 }
                 crate::TokenUse::Burn => {
@@ -82,7 +82,7 @@ pub fn start_game_with_nft(ctx: Context<StartGameWithNft>) -> Result<()> {
 
     campaign.active_games.add_assign(1);
     campaign.reserved_rewards.add_assign(max_rewards);
-    if campaign.reserved_rewards > campaign.rewards_available && campaign.init_funding > 0{
+    if campaign.rewards_available < campaign.reserved_rewards{
        return  err!(ErrorCodes::RewardsUnavailable)
     }
     campaign_player.in_game = true;
@@ -90,7 +90,7 @@ pub fn start_game_with_nft(ctx: Context<StartGameWithNft>) -> Result<()> {
 }
 
 #[derive(Accounts)]
-pub struct StartGameWithNft<'info> {
+pub struct StartGame<'info> {
     #[account(mut)]
     pub house: Box<Account<'info, House>>,
     #[account(mut)]
@@ -101,7 +101,7 @@ pub struct StartGameWithNft<'info> {
 
     pub system_program: Program<'info, System>,
 
-    #[account(init_if_needed, space=144, seeds = [b"player", campaign.key().as_ref(), &player_nft_metadata.as_ref().map_or(user.key().to_bytes(), |m| m.mint.to_bytes())[..]], bump, payer = user)]
+    #[account(init_if_needed, space=8+CampaignPlayer::INIT_SPACE+1 - campaign.token_config.map_or(StakeInfo::INIT_SPACE, |t| if t.token_use == TokenUse::Stake {0} else {StakeInfo::INIT_SPACE}), seeds = [b"player", campaign.key().as_ref(), &player_nft_metadata.as_ref().map_or(user.key().to_bytes(), |m| m.mint.to_bytes())[..]], bump, payer = user)]
     pub campaign_player: Account<'info, CampaignPlayer>,
 
     #[account(
@@ -127,7 +127,7 @@ pub struct StartGameWithNft<'info> {
 }
 
 
-impl StartGameWithNft<'_> {
+impl StartGame<'_> {
     pub fn get_player_identity(&self) -> Result<PlayerIdentity> {
         match (self.campaign.nft_config, &self.player_nft_metadata) {
             (None, None) => Ok(PlayerIdentity{

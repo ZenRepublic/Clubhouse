@@ -70,6 +70,8 @@ pub enum ErrorCodes {
     OracleRequired,
     #[msg("Oracle mismatch")]
     OracleMismatch,
-    #[msg("Game cannot be started due to insufficient funds")]
+    #[msg("Game cannot be started due to insufficient rewards")]
     RewardsUnavailable,
+    #[msg("No stake on player")]
+    NoStake,
 }

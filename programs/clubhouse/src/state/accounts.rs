@@ -1,14 +1,17 @@
-use anchor_lang::prelude::*;
+use anchor_lang::{accounts::interface, prelude::*};
 
 use crate::errors::ErrorCodes;
 
 #[account]
+#[derive(InitSpace)]
 /// If the admin is set, the program will check if the caller is the admin, otherwise it should check if the caller is the program authority
 pub struct ProgramAdminProof {
     pub program_admin: Pubkey,
 }
 
 #[account]
+
+#[derive(InitSpace)]
 pub struct Campaign {
     pub auth_bump: u8, 
     pub house: Pubkey,
@@ -29,15 +32,16 @@ pub struct Campaign {
     pub _reserved_config: [u64; 7],
     pub token_config: Option<TokenCampaignConfig>,
     pub _reserved_for_token: [u64; 3],
-    pub init_funding: u64,
     pub rewards_available: u64,
     pub reserved_rewards: u64,
-    pub slot_created: u64,
+    #[max_len(32)]
     pub campaign_name: String,
+    #[max_len(200)]
     pub uri: Option<String>,
 }
 
 #[account]
+#[derive(InitSpace)]
 pub struct House {
     pub bump: u8,
     pub house_admin: Pubkey,
@@ -68,6 +72,7 @@ pub struct House {
 
     _reserved2: [u64; 16],
 
+    #[max_len(32)]
     pub house_name: String,
 }
 
@@ -97,10 +102,19 @@ impl House {
     pub fn update(&mut self, new_config: HouseConfig) {
         self.config = new_config;
     }
+
+    pub fn add_campaign(&mut self) {
+        self.total_campaigns += 1;
+        self.open_campaigns += 1;
+    }
+
+    pub fn remove_campaign(&mut self) {
+        self.open_campaigns -= 1;
+    }
 }
 
 
-#[derive(AnchorDeserialize, AnchorSerialize, Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(AnchorDeserialize, AnchorSerialize, Clone, Copy, PartialEq, Eq, Debug, InitSpace)]
 pub struct HouseConfig {
     pub oracle_key: Pubkey,
     pub campaign_creation_fee: u64,
@@ -110,14 +124,14 @@ pub struct HouseConfig {
 }
 
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug, InitSpace)]
 pub struct NftCampaignConfig {
     pub collection: Pubkey,
     pub max_player_energy: u8,
     pub energy_recharge_minutes: Option<i64>,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug, InitSpace)]
 pub struct TokenCampaignConfig {
     pub spending_mint: Pubkey,
     pub energy_price: u64,
@@ -125,7 +139,7 @@ pub struct TokenCampaignConfig {
     pub token_use: TokenUse,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug, InitSpace)]
 pub enum TokenUse {
     Stake,
     Burn,
@@ -138,12 +152,12 @@ pub struct CampaignConstants {
     pub max_game_duration: i64,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug, InitSpace)]
 pub struct Duration {
     pub min_duration: i64,
     pub max_duration: i64,
 }
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug, InitSpace)]
 pub struct TimeSpan {
     pub start_time: i64,
     pub end_time: i64,
@@ -168,19 +182,18 @@ impl TimeSpan {
 }
 
 #[account]
+#[derive(InitSpace)]
 pub struct CampaignPlayer {
     pub player_identity: PlayerIdentity,
     pub campaign: Pubkey,
+    pub house: Pubkey,
     pub energy: u8,
     pub recharge_start_time: i64,
     pub game_start_time: i64,
     pub games_played: u32,
     pub in_game: bool,
-    pub game: Option<Pubkey>,
-    pub campaign_slot: u64,
     pub rewards_claimed: u64,
-    pub amount_staked: u64,
-    _reserved: [u8; 8]
+    pub stake_info: Option<StakeInfo>,
 }
 
 impl CampaignPlayer{
@@ -189,18 +202,30 @@ impl CampaignPlayer{
     }
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, Debug, InitSpace)]
+pub struct StakeInfo{
+    pub amount: u64,
+    pub campaign_end_time: i64,
+    pub staked_mint: Pubkey,
+    pub staked_mint_decimals: u8,
+    #[max_len(32)]
+    pub campaign_name: String,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug, InitSpace)]
 pub enum IdentityType{
     None,
     Nft,
     User,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug, InitSpace)]
 pub struct PlayerIdentity{
     pub identity_type: IdentityType,
     pub pubkey: Pubkey
 }
+
+
 
 
 impl PlayerIdentity {
@@ -225,16 +250,27 @@ impl CampaignPlayer {
         Ok(CampaignPlayer {
             player_identity: identity,
             campaign: campaign.key(),
+            house: campaign.house,
             energy: campaign.nft_config.map_or(0, |c| c.max_player_energy),
             recharge_start_time: clock.unix_timestamp,
             games_played: 0,
             in_game: false,
-            game: None,
             game_start_time: 0,
-            campaign_slot: campaign.slot_created,
             rewards_claimed: 0,
-            amount_staked: 0,
-            _reserved: [0; 8],
+            stake_info: {
+                if campaign.token_config.is_some_and(|c| c.token_use == TokenUse::Stake) {
+                    Some(StakeInfo {
+                        amount: 0,
+                        campaign_end_time: campaign.time_span.end_time,
+                        staked_mint: campaign.token_config.unwrap().spending_mint,
+                        staked_mint_decimals: campaign.token_config.unwrap().spending_mint_decimals,
+                        campaign_name: campaign.campaign_name.clone(),
+                    })
+                } else {
+                    None
+                }
+            },
+
         })
     }
     

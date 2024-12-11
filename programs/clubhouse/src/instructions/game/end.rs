@@ -4,7 +4,7 @@ use crate::{execute_lamport_transfer, execute_token_transfer, metadata_contains,
 
 use crate::{errors::ErrorCodes, Campaign, CampaignPlayer, House};
 
-pub fn end_game_with_nft(ctx: Context<EndGameWithNft>, amount_won: u64) -> Result<()> {
+pub fn end_game(ctx: Context<EndGame>, amount_won: u64) -> Result<()> {
     let campaign_player = &mut ctx.accounts.campaign_player;
 
     match (ctx.accounts.campaign.nft_config, &ctx.accounts.player_nft_metadata, &ctx.accounts.player_nft_token_account) {
@@ -30,7 +30,7 @@ pub fn end_game_with_nft(ctx: Context<EndGameWithNft>, amount_won: u64) -> Resul
             }
         }
    } 
-   let pre_balance = ctx.accounts.reward_vault.amount;
+   
    if amount_won > 0 {
         if amount_won > ctx.accounts.campaign.max_rewards_per_game {return err!(ErrorCodes::AmountTooHigh)}
    
@@ -65,18 +65,15 @@ pub fn end_game_with_nft(ctx: Context<EndGameWithNft>, amount_won: u64) -> Resul
 
     ctx.accounts.campaign.active_games = ctx.accounts.campaign.active_games.saturating_sub(1);
     ctx.accounts.campaign.total_games +=1;
-    ctx.accounts.campaign.rewards_available = pre_balance - amount_won;
+    ctx.accounts.campaign.rewards_available = ctx.accounts.campaign.rewards_available - amount_won;
 
     //TODO: fix 
     ctx.accounts.campaign.reserved_rewards = ctx.accounts.campaign.reserved_rewards.saturating_sub(ctx.accounts.campaign.max_rewards_per_game);
-    if ctx.accounts.campaign.init_funding == 0 {
-        ctx.accounts.campaign.init_funding = ctx.accounts.campaign.rewards_available;
-    }
     Ok(())
 }
 
 #[derive(Accounts)]
-pub struct EndGameWithNft<'info> {
+pub struct EndGame<'info> {
     #[account(mut)]
     pub house: Box<Account<'info, House>>,
 
@@ -127,7 +124,7 @@ pub struct EndGameWithNft<'info> {
     pub system_program: Program<'info, System>
 }
 
-impl EndGameWithNft<'_> {
+impl EndGame<'_> {
     pub fn get_player_identity(&self) -> Result<PlayerIdentity> {
         match (self.campaign.nft_config, &self.player_nft_metadata) {
             (None, None) => Ok(

@@ -28,8 +28,6 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
         return err!(errors::ErrorCodes::InvalidTimeSpan);
     }
 
-    msg!("token config: {:?}, game mint: {:?}, deposit vault: {:?}", token_campaign_config, ctx.accounts.game_mint, ctx.accounts.game_deposit_vault);
-
     match token_campaign_config {
         Some(token_config) => {
             
@@ -65,7 +63,6 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
         max_rewards_per_game: max_rewards_per_game,
         rewards_claim_fee: player_claim_price,
         rewards_available: fund_amount,
-        init_funding: fund_amount,
         manager_mint: None,
         player_count: 0,
         active_games: 0,
@@ -74,10 +71,9 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
         _reserved_config: [0; 7],
         _reserved_for_token: [0; 3],
         reserved_rewards: 0,
-        slot_created: clock.slot,
     });
 
-    ctx.accounts.house.total_campaigns.add_assign(1);
+    ctx.accounts.house.add_campaign();
     let fee = ctx.accounts.house.config.campaign_creation_fee;
     ctx.accounts.house.unclaimed_house_fees += fee;
     if fee > ctx.accounts.creation_fee_account.amount { return err!(ErrorCodes::InsufficientFunds)}

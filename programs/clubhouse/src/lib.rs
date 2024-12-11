@@ -8,6 +8,7 @@ use house::*;
 use campaign::*;
 use game::*;
 use program_admin::*;
+use player::*;
 
 declare_id!("C1ubv5AC5w7Eh3iHpEt2BXZ1g3eARQtMRgmE2AXfznSg");
 
@@ -44,12 +45,16 @@ pub mod clubhouse {
         campaign::close_campaign(ctx)
     }
 
-    pub fn start_game_with_nft(ctx: Context<StartGameWithNft>) -> Result<()> {
-        game::start_game_with_nft(ctx)
+    pub fn start_game(ctx: Context<StartGame>) -> Result<()> {
+        game::start_game(ctx)
     }
 
-    pub fn end_game_with_nft(ctx: Context<EndGameWithNft>, amount_won: u64) -> Result<()> {
-        game::end_game_with_nft(ctx, amount_won)
+    pub fn end_game(ctx: Context<EndGame>, amount_won: u64) -> Result<()> {
+        game::end_game(ctx, amount_won)
+    }
+
+    pub fn claim_stake(ctx: Context<ClaimStake>) -> Result<()> {
+        player::claim_stake(ctx)
     }
 
 
