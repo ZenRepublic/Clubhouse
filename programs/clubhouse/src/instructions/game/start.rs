@@ -1,6 +1,6 @@
 use std::ops::AddAssign;
 
-use anchor_lang::{prelude::*, Owners};
+use anchor_lang::prelude::*;
 use anchor_spl::{metadata::MetadataAccount, token_interface::{Mint, TokenAccount, TokenInterface}};
 use crate::{errors, execute_token_burn, execute_token_transfer, metadata_contains, IdentityType, PlayerIdentity, StakeInfo, TokenUse};
 
@@ -85,6 +85,7 @@ pub fn start_game(ctx: Context<StartGame>) -> Result<()> {
     if campaign.rewards_available < campaign.reserved_rewards{
        return  err!(ErrorCodes::RewardsUnavailable)
     }
+    
     campaign_player.in_game = true;
     Ok(())
 }
@@ -97,11 +98,12 @@ pub struct StartGame<'info> {
     pub campaign: Box<Account<'info, Campaign>>,
     #[account(mut)]
     pub user: Signer<'info>,
+
     pub token_program: Interface<'info, TokenInterface>,
 
     pub system_program: Program<'info, System>,
 
-    #[account(init_if_needed, space=8+CampaignPlayer::INIT_SPACE+1 - campaign.token_config.map_or(StakeInfo::INIT_SPACE, |t| if t.token_use == TokenUse::Stake {0} else {StakeInfo::INIT_SPACE}), seeds = [b"player", campaign.key().as_ref(), &player_nft_metadata.as_ref().map_or(user.key().to_bytes(), |m| m.mint.to_bytes())[..]], bump, payer = user)]
+    #[account(init_if_needed, space=8+CampaignPlayer::INIT_SPACE - campaign.token_config.map_or(StakeInfo::INIT_SPACE, |t| if t.token_use == TokenUse::Stake {0} else {StakeInfo::INIT_SPACE}), seeds = [b"player", campaign.key().as_ref(), &player_nft_metadata.as_ref().map_or(user.key().to_bytes(), |m| m.mint.to_bytes())[..]], bump, payer = user)]
     pub campaign_player: Account<'info, CampaignPlayer>,
 
     #[account(

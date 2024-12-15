@@ -1,4 +1,4 @@
-use anchor_lang::{accounts::interface, prelude::*};
+use anchor_lang::prelude::*;
 
 use crate::errors::ErrorCodes;
 

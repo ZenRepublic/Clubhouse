@@ -58,7 +58,7 @@ pub fn close_campaign(ctx: Context<CloseCampaign>) -> Result<()> {
 
 #[derive(Accounts)]
 pub struct CloseCampaign<'info> {
-    #[account(mut,close=creator, has_one=creator, has_one=house)]
+    #[account(mut, close=creator, has_one=creator, has_one=house)]
     pub campaign: Box<Account<'info, Campaign>>,
     /// CHECK: the campaign auth PDA
     #[account()]
