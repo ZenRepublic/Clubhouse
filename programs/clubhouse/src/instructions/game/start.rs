@@ -52,7 +52,7 @@ pub fn start_game(ctx: Context<StartGame>) -> Result<()> {
                 }
             }
         },
-        (Some(nft_config), None, IdentityType::Nft, Some(metadata)) => {
+        (Some(_), None, IdentityType::Nft, Some(_)) => {
             
         },
 
