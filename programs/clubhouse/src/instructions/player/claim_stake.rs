@@ -4,13 +4,13 @@ use anchor_spl::{associated_token::AssociatedToken, token_interface::{Mint, Toke
 use crate::{errors::ErrorCodes, execute_token_transfer, state::CampaignPlayer, StakeInfo};
 
 pub fn claim_stake(ctx: Context<ClaimStake>) -> Result<()> {
-    require!(!ctx.accounts.campaign_player.in_game, ErrorCodes::PlayerInGame);
     require!(ctx.accounts.campaign_player.stake_info.is_some(), ErrorCodes::NoStake);
+    
     let campaign = ctx.accounts.campaign_player.campaign;
 
     match ctx.accounts.campaign_player.stake_info.as_mut() {
         Some(stake_info) => {
-            
+            require!(stake_info.campaign_end_time < Clock::get()?.unix_timestamp, ErrorCodes::ActiveCampaign);
             execute_token_transfer(
                 stake_info.amount,
                 ctx.accounts.game_deposit_vault.to_account_info(),
@@ -25,6 +25,7 @@ pub fn claim_stake(ctx: Context<ClaimStake>) -> Result<()> {
             stake_info.staked_mint_decimals = 0;
             stake_info.campaign_name = "".to_string();
             ctx.accounts.campaign_player.stake_info = None;
+            ctx.accounts.campaign_player.in_game = false;
             Ok(())
         },
         None => err!(ErrorCodes::NoStake),
