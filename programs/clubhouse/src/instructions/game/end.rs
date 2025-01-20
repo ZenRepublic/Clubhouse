@@ -18,6 +18,8 @@ pub fn end_game(ctx: Context<EndGame>, amount_won: u64) -> Result<()> {
     if campaign_player.campaign != ctx.accounts.campaign.key() {
         return err!(ErrorCodes::CollectionProofInvalid)
     }
+
+    require!(campaign_player.in_game, ErrorCodes::RewardsUnavailable);
    match &ctx.accounts.oracle {
         Some(oracle) => {
             if ctx.accounts.campaign.house_config_snapshot.oracle_key != oracle.key() {
