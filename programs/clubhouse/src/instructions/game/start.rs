@@ -2,6 +2,7 @@ use std::ops::AddAssign;
 
 use anchor_lang::prelude::*;
 use anchor_spl::{metadata::MetadataAccount, token_interface::{Mint, TokenAccount, TokenInterface}};
+use mpl_core::{accounts::BaseAssetV1, types::UpdateAuthority, Asset};
 use crate::{errors, execute_token_burn, execute_token_transfer, metadata_contains, IdentityType, PlayerIdentity, StakeInfo, TokenUse};
 
 use crate::{errors::ErrorCodes, Campaign, CampaignPlayer, House};
@@ -11,6 +12,7 @@ pub fn start_game(ctx: Context<StartGame>) -> Result<()> {
     let inferred_identity = ctx.accounts.get_player_identity()?;
     let campaign = &mut ctx.accounts.campaign;
     let campaign_player = &mut ctx.accounts.campaign_player;
+
 
     require!(!campaign_player.in_game, ErrorCodes::PlayerInGame);
 
@@ -52,19 +54,22 @@ pub fn start_game(ctx: Context<StartGame>) -> Result<()> {
                 }
             }
         },
-        (Some(_), None, IdentityType::Nft, Some(_)) => {
+        (Some(_), None, IdentityType::Nft | IdentityType::MplCore, Some(_)) => {
             
         },
 
         (_, _, _ , _,) => return err!(ErrorCodes::InvalidInput),
     };
 
-    match (&ctx.accounts.player_nft_token_account, &ctx.accounts.player_nft_metadata, &ctx.accounts.game_deposit_mint, &ctx.accounts.game_deposit_vault, &ctx.accounts.players_deposit_account) {
-        (Some(_), Some(_), Some(_), Some(_), Some(_)) => {},
-        (Some(_), Some(_), None, None, None) => {},
-        (None, None, Some(_), None, Some(_)) => {},
-        (None, None, Some(_), Some(_), Some(_)) => {},
-        (_, _, _, _, _) => return err!(ErrorCodes::InvalidInput),
+
+
+    match (&ctx.accounts.player_nft_token_account, &ctx.accounts.player_nft_metadata, &ctx.accounts.game_deposit_mint, &ctx.accounts.game_deposit_vault, &ctx.accounts.players_deposit_account, &ctx.accounts.player_core_nft) {
+        (Some(_), Some(_), Some(_), Some(_), Some(_), None) => {}, // nft & pay?
+        (Some(_), Some(_), None, None, None, None) => {}, // nft
+        (None, None, Some(_), None, Some(_), None) => {}, // burn
+        (None, None, Some(_), Some(_), Some(_), None) => {}, // pay
+        (None, None, None, None, None, Some(_)) => {}, // core
+        (_, _, _, _, _, _) => return err!(ErrorCodes::InvalidInput),
     };
 
 
@@ -126,22 +131,30 @@ pub struct StartGame<'info> {
         seeds=[b"player_deposit", campaign.key().as_ref()], bump
     )]
     pub game_deposit_vault: Option<Box<InterfaceAccount<'info, TokenAccount>>>,
+
+    #[account(constraint = player_core_nft.owner == user.key() @ ErrorCodes::TokenOwnerMismatch, constraint = player_core_nft.update_authority == UpdateAuthority::Collection(campaign.nft_config.unwrap().collection) @ ErrorCodes::OwnerBalanceMismatch)]
+    pub player_core_nft: Option<Box<Account<'info, BaseAssetV1>>>,
 }
 
 
 impl StartGame<'_> {
     pub fn get_player_identity(&self) -> Result<PlayerIdentity> {
-        match (self.campaign.nft_config, &self.player_nft_metadata) {
-            (None, None) => Ok(PlayerIdentity{
+        match (self.campaign.nft_config, &self.player_nft_metadata, &self.player_core_nft) {
+            (None, None, None) => Ok(PlayerIdentity{
                     identity_type: IdentityType::User,
                     pubkey: self.user.key(),
                 }),
-            (None, Some(_)) => err!(ErrorCodes::UnexpectedMetadata),
-            (Some(_), None) => err!(ErrorCodes::MissingMetadata),
-            (Some(_), Some(_)) => Ok(PlayerIdentity{
+            (None, Some(_), None) => err!(ErrorCodes::UnexpectedMetadata),
+            (Some(_), None, None) => err!(ErrorCodes::MissingMetadata),
+            (Some(_), Some(metadata), None) => Ok(PlayerIdentity{
              identity_type: IdentityType::Nft,
-             pubkey: self.player_nft_metadata.as_ref().unwrap().mint
+             pubkey: metadata.mint
             }),
+            (None, None, Some(nft)) => Ok(PlayerIdentity{
+                identity_type: IdentityType::MplCore,
+                pubkey: nft.key()
+            }),
+            (_, _, _) => err!(ErrorCodes::InvalidInput),
         }
     }
 }

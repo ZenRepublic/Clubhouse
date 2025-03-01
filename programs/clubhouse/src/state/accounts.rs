@@ -217,6 +217,7 @@ pub enum IdentityType{
     None,
     Nft,
     User,
+    MplCore,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, Debug, InitSpace)]
@@ -234,6 +235,7 @@ impl PlayerIdentity {
             IdentityType::None => None,
             IdentityType::Nft => Some(self.pubkey),
             IdentityType::User => Some(self.pubkey),
+            IdentityType::MplCore => Some(self.pubkey),
         }
     }
     
@@ -331,12 +333,14 @@ impl CampaignPlayer {
     pub fn spend_energy(&mut self, energy_to_spend: u8) -> Result<()> {
         match self.player_identity.identity_type {
             IdentityType::None => err!(ErrorCodes::InvalidInput),
-            IdentityType::Nft => {
+            IdentityType::Nft | 
+            IdentityType::MplCore => {
                 self.energy = self.energy.checked_sub(energy_to_spend).unwrap();
                 msg!("energy spent, remaining: {}", self.energy);
                 Ok(())
             },
             IdentityType::User => Ok(()),
+
         }
         
     }

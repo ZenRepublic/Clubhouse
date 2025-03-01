@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{associated_token::AssociatedToken, metadata::MetadataAccount, token::{Mint, Token, TokenAccount}};
+use mpl_core::{accounts::BaseAssetV1, types::UpdateAuthority};
 use crate::{execute_lamport_transfer, execute_token_transfer, metadata_contains, IdentityType, PlayerIdentity};
 
 use crate::{errors::ErrorCodes, Campaign, CampaignPlayer, House};
@@ -100,6 +101,9 @@ pub struct EndGame<'info> {
     #[account(constraint = metadata_contains(&player_nft_metadata,&campaign.nft_config.unwrap().collection).is_ok())]
     pub player_nft_metadata: Option<Box<Account<'info, MetadataAccount>>>,
 
+    #[account(constraint = player_core_nft.owner == user.key() @ ErrorCodes::TokenOwnerMismatch, constraint = player_core_nft.update_authority == UpdateAuthority::Collection(campaign.nft_config.unwrap().collection) @ ErrorCodes::OwnerBalanceMismatch)]
+    pub player_core_nft: Option<Box<Account<'info, BaseAssetV1>>>,
+
     #[account()]
     pub reward_mint: Box<Account<'info, Mint>>,
 
@@ -128,18 +132,22 @@ pub struct EndGame<'info> {
 
 impl EndGame<'_> {
     pub fn get_player_identity(&self) -> Result<PlayerIdentity> {
-        match (self.campaign.nft_config, &self.player_nft_metadata) {
-            (None, None) => Ok(
-                PlayerIdentity{
+        match (self.campaign.nft_config, &self.player_nft_metadata, &self.player_core_nft) {
+            (None, None, None) => Ok(PlayerIdentity{
                     identity_type: IdentityType::User,
                     pubkey: self.user.key(),
                 }),
-            (None, Some(_)) => err!(ErrorCodes::UnexpectedMetadata),
-            (Some(_), None) => err!(ErrorCodes::MissingMetadata),
-            (Some(_), Some(_)) => Ok(PlayerIdentity{
+            (None, Some(_), None) => err!(ErrorCodes::UnexpectedMetadata),
+            (Some(_), None, None) => err!(ErrorCodes::MissingMetadata),
+            (Some(_), Some(metadata), None) => Ok(PlayerIdentity{
              identity_type: IdentityType::Nft,
-             pubkey: self.player_nft_metadata.as_ref().unwrap().mint
-        }),
+             pubkey: metadata.mint
+            }),
+            (None, None, Some(nft)) => Ok(PlayerIdentity{
+                identity_type: IdentityType::MplCore,
+                pubkey: nft.key()
+            }),
+            (_, _, _) => err!(ErrorCodes::InvalidInput),
         }
     }
 }

@@ -17,8 +17,9 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = { git = "https://github.com/coral-xyz/anchor", rev = "afcbaedac69d23544cad177acfbe10b325cf0a06" , features = ["init-if-needed"] }
-anchor-spl = { git = "https://github.com/coral-xyz/anchor", rev = "afcbaedac69d23544cad177acfbe10b325cf0a06" , features = [
+anchor-lang = { version = "0.30.1", features = ["init-if-needed"] }
+anchor-spl = { version = "0.30.1", features = [
     "token",
     "metadata",
     "mpl-token-metadata",]}
+mpl-core = {version = "0.8.1", features = ["anchor"]}
