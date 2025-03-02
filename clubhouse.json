@@ -1470,47 +1470,6 @@
   ],
   "accounts": [
     {
-      "name": "BaseAssetV1",
-      "discriminator": [
-        1
-      ],
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "key",
-            "type": {
-              "defined": "Key"
-            }
-          },
-          {
-            "name": "owner",
-            "type": "publicKey"
-          },
-          {
-            "name": "update_authority",
-            "type": {
-              "defined": "UpdateAuthority"
-            }
-          },
-          {
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "name": "uri",
-            "type": "string"
-          },
-          {
-            "name": "seq",
-            "type": {
-              "option": "u64"
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "Campaign",
       "discriminator": [
         50,
@@ -2042,44 +2001,6 @@
   ],
   "types": [
     {
-      "name": "BaseAssetV1",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "key",
-            "type": {
-              "defined": "Key"
-            }
-          },
-          {
-            "name": "owner",
-            "type": "publicKey"
-          },
-          {
-            "name": "update_authority",
-            "type": {
-              "defined": "UpdateAuthority"
-            }
-          },
-          {
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "name": "uri",
-            "type": "string"
-          },
-          {
-            "name": "seq",
-            "type": {
-              "option": "u64"
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "Campaign",
       "type": {
         "kind": "struct",
@@ -2420,32 +2341,6 @@
       }
     },
     {
-      "name": "Key",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Uninitialized"
-          },
-          {
-            "name": "AssetV1"
-          },
-          {
-            "name": "HashedAssetV1"
-          },
-          {
-            "name": "PluginHeaderV1"
-          },
-          {
-            "name": "PluginRegistryV1"
-          },
-          {
-            "name": "CollectionV1"
-          }
-        ]
-      }
-    },
-    {
       "name": "NftCampaignConfig",
       "type": {
         "kind": "struct",
@@ -2583,29 +2478,6 @@
           },
           {
             "name": "Pay"
-          }
-        ]
-      }
-    },
-    {
-      "name": "UpdateAuthority",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "None"
-          },
-          {
-            "name": "Address",
-            "fields": [
-              "pubkey"
-            ]
-          },
-          {
-            "name": "Collection",
-            "fields": [
-              "pubkey"
-            ]
           }
         ]
       }
