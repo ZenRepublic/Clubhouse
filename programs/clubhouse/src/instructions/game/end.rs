@@ -1,13 +1,12 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{associated_token::AssociatedToken, metadata::MetadataAccount, token::{Mint, Token, TokenAccount}};
-use mpl_core::{accounts::BaseAssetV1, types::UpdateAuthority};
-use crate::{execute_lamport_transfer, execute_token_transfer, metadata_contains, IdentityType, PlayerIdentity};
+use crate::{execute_lamport_transfer, execute_token_transfer, metadata_contains, state::{SimplifiedAssetV1, UpdateAuthority}, IdentityType, PlayerIdentity};
 
 use crate::{errors::ErrorCodes, Campaign, CampaignPlayer, House};
 
 pub fn end_game(ctx: Context<EndGame>, amount_won: u64) -> Result<()> {
+    ctx.accounts.validate_core_nft()?;
     let campaign_player = &mut ctx.accounts.campaign_player;
-
     match (ctx.accounts.campaign.nft_config, &ctx.accounts.player_nft_metadata, &ctx.accounts.player_nft_token_account) {
         (None, None, None) => {},
         (Some(_), Some(_), Some(_)) => {},
@@ -87,7 +86,17 @@ pub struct EndGame<'info> {
     #[account(seeds=[campaign.key().as_ref()], bump)]
     pub campaign_auth: AccountInfo<'info>,
 
-    #[account(mut, seeds = [b"player", campaign.key().as_ref(), &player_nft_metadata.as_ref().map_or(user.key().to_bytes(), |m| m.mint.to_bytes())[..]], bump)]
+    #[account(mut, 
+        seeds = [
+            b"player", 
+            campaign.key().as_ref(), 
+            &match (&player_nft_metadata, &player_core_nft) {
+                (Some(metadata), _) => metadata.mint.to_bytes(),
+                (None, Some(core_nft)) => core_nft.key().to_bytes(),
+                (None, None) => user.key().to_bytes(),
+            }[..]
+        ],
+        bump)]
     pub campaign_player: Box<Account<'info, CampaignPlayer>>,
 
     #[account(
@@ -101,8 +110,9 @@ pub struct EndGame<'info> {
     #[account(constraint = metadata_contains(&player_nft_metadata,&campaign.nft_config.unwrap().collection).is_ok())]
     pub player_nft_metadata: Option<Box<Account<'info, MetadataAccount>>>,
 
-    #[account(constraint = player_core_nft.owner == user.key() @ ErrorCodes::TokenOwnerMismatch, constraint = player_core_nft.update_authority == UpdateAuthority::Collection(campaign.nft_config.unwrap().collection) @ ErrorCodes::OwnerBalanceMismatch)]
-    pub player_core_nft: Option<Box<Account<'info, BaseAssetV1>>>,
+    /// CHECK: Custom validation for mpl-core asset
+    #[account()]
+    pub player_core_nft: Option<AccountInfo<'info>>,
 
     #[account()]
     pub reward_mint: Box<Account<'info, Mint>>,
@@ -131,6 +141,25 @@ pub struct EndGame<'info> {
 }
 
 impl EndGame<'_> {
+    pub fn validate_core_nft(&self) -> Result<()> {
+        if let Some(core_nft_info) = &self.player_core_nft {
+            let nft = SimplifiedAssetV1::from_account_info(core_nft_info)?;
+            
+            if nft.owner != self.user.key() {
+                return err!(ErrorCodes::TokenOwnerMismatch);
+            }
+            
+            if let Some(nft_config) = self.campaign.nft_config {
+                if nft.update_authority != UpdateAuthority::Collection(nft_config.collection) {
+                    return err!(ErrorCodes::OwnerBalanceMismatch);
+                }
+            } else {
+                return err!(ErrorCodes::InvalidInput);
+            }
+        }
+        
+        Ok(())
+    }
     pub fn get_player_identity(&self) -> Result<PlayerIdentity> {
         match (self.campaign.nft_config, &self.player_nft_metadata, &self.player_core_nft) {
             (None, None, None) => Ok(PlayerIdentity{

@@ -1,5 +1,5 @@
 [toolchain]
-anchor_version = "0.30.1-afcbaedac69d23544cad177acfbe10b325cf0a06" 
+anchor_version = "0.30.1" 
 solana_version = "2.1.4"
 
 [features]

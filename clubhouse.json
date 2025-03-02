@@ -1,0 +1,2614 @@
+{
+  "address": "C1ubv5AC5w7Eh3iHpEt2BXZ1g3eARQtMRgmE2AXfznSg",
+  "metadata": {
+    "name": "clubhouse",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Solana Clubhouse is a program that does club things"
+  },
+  "instructions": [
+    {
+      "name": "add_program_admin",
+      "discriminator": [
+        119,
+        52,
+        37,
+        43,
+        17,
+        188,
+        140,
+        81
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "program_admin"
+        },
+        {
+          "name": "program_data",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  163,
+                  172,
+                  8,
+                  143,
+                  167,
+                  33,
+                  31,
+                  74,
+                  194,
+                  16,
+                  203,
+                  151,
+                  97,
+                  129,
+                  208,
+                  138,
+                  22,
+                  154,
+                  213,
+                  199,
+                  26,
+                  8,
+                  12,
+                  60,
+                  211,
+                  162,
+                  14,
+                  121,
+                  84,
+                  241,
+                  196,
+                  237
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program_admin_proof",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  103,
+                  114,
+                  97,
+                  109,
+                  95,
+                  97,
+                  100,
+                  109,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "program_admin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_stake",
+      "discriminator": [
+        62,
+        145,
+        133,
+        242,
+        244,
+        59,
+        53,
+        139
+      ],
+      "accounts": [
+        {
+          "name": "campaign_player",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "campaign_auth",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "campaign_player.campaign",
+                "account": "CampaignPlayer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "game_deposit_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  100,
+                  101,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign_player.campaign",
+                "account": "CampaignPlayer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "stake_recipient_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "game_deposit_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "game_deposit_mint"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_campaign",
+      "discriminator": [
+        65,
+        49,
+        110,
+        7,
+        63,
+        238,
+        206,
+        77
+      ],
+      "accounts": [
+        {
+          "name": "campaign",
+          "writable": true
+        },
+        {
+          "name": "campaign_auth"
+        },
+        {
+          "name": "reward_withdrawal_account",
+          "docs": [
+            "the account that deposits rewards for the campaign"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "reward_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "reward_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "reward_mint",
+          "docs": [
+            "the vault where the rewards are held to be claimed"
+          ]
+        },
+        {
+          "name": "reward_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  119,
+                  97,
+                  114,
+                  100,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "house",
+          "writable": true,
+          "relations": [
+            "campaign"
+          ]
+        },
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "campaign"
+          ]
+        },
+        {
+          "name": "game_deposit_vault",
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  100,
+                  101,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deposit_withdrawal_account",
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "deposit_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "game_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "game_mint",
+          "optional": true
+        },
+        {
+          "name": "deposit_token_program",
+          "optional": true
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "reward_token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_house",
+      "discriminator": [
+        122,
+        1,
+        139,
+        0,
+        208,
+        240,
+        48,
+        151
+      ],
+      "accounts": [
+        {
+          "name": "house",
+          "writable": true
+        },
+        {
+          "name": "house_admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "house"
+          ]
+        },
+        {
+          "name": "house_currency_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "house"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin_withdraw_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "house_admin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "house_currency"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "house_currency",
+          "relations": [
+            "house"
+          ]
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_campaign",
+      "discriminator": [
+        111,
+        131,
+        187,
+        98,
+        160,
+        193,
+        114,
+        244
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "campaign",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "campaign_auth",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "house",
+          "writable": true
+        },
+        {
+          "name": "creation_fee_account",
+          "docs": [
+            "pays the campaign creation fees"
+          ],
+          "writable": true
+        },
+        {
+          "name": "reward_mint"
+        },
+        {
+          "name": "house_vault",
+          "docs": [
+            "the vault where we pay the campaign creation fees"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "house"
+              }
+            ]
+          }
+        },
+        {
+          "name": "reward_depositor_account",
+          "docs": [
+            "the account that deposits rewards for the campaign"
+          ],
+          "writable": true
+        },
+        {
+          "name": "reward_vault",
+          "docs": [
+            "the vault where the rewards are held to be claimed"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  119,
+                  97,
+                  114,
+                  100,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "game_mint",
+          "optional": true
+        },
+        {
+          "name": "game_deposit_vault",
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  100,
+                  101,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "campaign_name",
+          "type": "string"
+        },
+        {
+          "name": "custom_data",
+          "type": {
+            "option": "string"
+          }
+        },
+        {
+          "name": "fund_amount",
+          "type": "u64"
+        },
+        {
+          "name": "max_rewards_per_game",
+          "type": "u64"
+        },
+        {
+          "name": "player_claim_price",
+          "type": "u64"
+        },
+        {
+          "name": "time_span",
+          "type": {
+            "defined": "TimeSpan"
+          }
+        },
+        {
+          "name": "nft_config",
+          "type": {
+            "option": {
+              "defined": "NftCampaignConfig"
+            }
+          }
+        },
+        {
+          "name": "token_config",
+          "type": {
+            "option": {
+              "defined": "TokenCampaignConfig"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_house",
+      "discriminator": [
+        11,
+        92,
+        141,
+        8,
+        128,
+        45,
+        64,
+        89
+      ],
+      "accounts": [
+        {
+          "name": "program_admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "program_admin_proof"
+          ]
+        },
+        {
+          "name": "program_admin_proof",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  103,
+                  114,
+                  97,
+                  109,
+                  95,
+                  97,
+                  100,
+                  109,
+                  105,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "program_admin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "house",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  104,
+                  111,
+                  117,
+                  115,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "house_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "house_auth",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "house"
+              }
+            ]
+          }
+        },
+        {
+          "name": "house_currency_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "house"
+              }
+            ]
+          }
+        },
+        {
+          "name": "house_admin"
+        },
+        {
+          "name": "house_currency_mint"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "manager_collection",
+          "type": {
+            "option": "publicKey"
+          }
+        },
+        {
+          "name": "house_config",
+          "type": {
+            "defined": "HouseConfig"
+          }
+        },
+        {
+          "name": "house_name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "end_game",
+      "discriminator": [
+        224,
+        135,
+        245,
+        99,
+        67,
+        175,
+        121,
+        252
+      ],
+      "accounts": [
+        {
+          "name": "house",
+          "writable": true,
+          "relations": [
+            "campaign"
+          ]
+        },
+        {
+          "name": "campaign",
+          "writable": true
+        },
+        {
+          "name": "campaign_auth",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "campaign_player",
+          "writable": true
+        },
+        {
+          "name": "player_nft_token_account",
+          "optional": true
+        },
+        {
+          "name": "player_nft_metadata",
+          "optional": true
+        },
+        {
+          "name": "player_core_nft",
+          "optional": true
+        },
+        {
+          "name": "reward_mint",
+          "relations": [
+            "campaign"
+          ]
+        },
+        {
+          "name": "reward_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  119,
+                  97,
+                  114,
+                  100,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player_reward_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "reward_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "oracle",
+          "signer": true,
+          "optional": true
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_won",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "start_game",
+      "discriminator": [
+        249,
+        47,
+        252,
+        172,
+        184,
+        162,
+        245,
+        14
+      ],
+      "accounts": [
+        {
+          "name": "house",
+          "writable": true
+        },
+        {
+          "name": "campaign",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "campaign_player",
+          "writable": true
+        },
+        {
+          "name": "player_nft_token_account",
+          "optional": true
+        },
+        {
+          "name": "player_nft_metadata",
+          "optional": true
+        },
+        {
+          "name": "game_deposit_mint",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "players_deposit_account",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "game_deposit_vault",
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114,
+                  95,
+                  100,
+                  101,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player_core_nft",
+          "optional": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_house",
+      "discriminator": [
+        13,
+        153,
+        166,
+        250,
+        48,
+        39,
+        227,
+        200
+      ],
+      "accounts": [
+        {
+          "name": "house",
+          "writable": true
+        },
+        {
+          "name": "house_admin",
+          "signer": true,
+          "relations": [
+            "house"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "house_config",
+          "type": {
+            "defined": "HouseConfig"
+          }
+        }
+      ]
+    },
+    {
+      "name": "withdraw_house_fees",
+      "discriminator": [
+        100,
+        154,
+        60,
+        5,
+        149,
+        63,
+        203,
+        28
+      ],
+      "accounts": [
+        {
+          "name": "house",
+          "writable": true
+        },
+        {
+          "name": "house_admin",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "house"
+          ]
+        },
+        {
+          "name": "house_currency_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "house"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin_withdraw_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "house_admin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "house_currency"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "house_currency",
+          "relations": [
+            "house"
+          ]
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "BaseAssetV1",
+      "discriminator": [
+        1
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": "Key"
+            }
+          },
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "update_authority",
+            "type": {
+              "defined": "UpdateAuthority"
+            }
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "seq",
+            "type": {
+              "option": "u64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Campaign",
+      "discriminator": [
+        50,
+        40,
+        49,
+        11,
+        157,
+        220,
+        229,
+        192
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "auth_bump",
+            "type": "u8"
+          },
+          {
+            "name": "house",
+            "type": "publicKey"
+          },
+          {
+            "name": "creator",
+            "type": "publicKey"
+          },
+          {
+            "name": "manager_mint",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "reward_mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "reward_mint_decimals",
+            "type": "u8"
+          },
+          {
+            "name": "max_rewards_per_game",
+            "type": "u64"
+          },
+          {
+            "name": "rewards_claim_fee",
+            "type": "u64"
+          },
+          {
+            "name": "player_count",
+            "type": "u32"
+          },
+          {
+            "name": "active_games",
+            "type": "u32"
+          },
+          {
+            "name": "total_games",
+            "type": "u32"
+          },
+          {
+            "name": "time_span",
+            "type": {
+              "defined": "TimeSpan"
+            }
+          },
+          {
+            "name": "house_config_snapshot",
+            "type": {
+              "defined": "HouseConfig"
+            }
+          },
+          {
+            "name": "nft_config",
+            "type": {
+              "option": {
+                "defined": "NftCampaignConfig"
+              }
+            }
+          },
+          {
+            "name": "unclaimed_sol_fees",
+            "type": "u64"
+          },
+          {
+            "name": "_reserved_config",
+            "type": {
+              "array": [
+                "u64",
+                7
+              ]
+            }
+          },
+          {
+            "name": "token_config",
+            "type": {
+              "option": {
+                "defined": "TokenCampaignConfig"
+              }
+            }
+          },
+          {
+            "name": "_reserved_for_token",
+            "type": {
+              "array": [
+                "u64",
+                3
+              ]
+            }
+          },
+          {
+            "name": "rewards_available",
+            "type": "u64"
+          },
+          {
+            "name": "reserved_rewards",
+            "type": "u64"
+          },
+          {
+            "name": "campaign_name",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": {
+              "option": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignPlayer",
+      "discriminator": [
+        83,
+        45,
+        20,
+        151,
+        77,
+        14,
+        237,
+        46
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "player_identity",
+            "type": {
+              "defined": "PlayerIdentity"
+            }
+          },
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "house",
+            "type": "publicKey"
+          },
+          {
+            "name": "energy",
+            "type": "u8"
+          },
+          {
+            "name": "recharge_start_time",
+            "type": "i64"
+          },
+          {
+            "name": "game_start_time",
+            "type": "i64"
+          },
+          {
+            "name": "games_played",
+            "type": "u32"
+          },
+          {
+            "name": "in_game",
+            "type": "bool"
+          },
+          {
+            "name": "rewards_claimed",
+            "type": "u64"
+          },
+          {
+            "name": "stake_info",
+            "type": {
+              "option": {
+                "defined": "StakeInfo"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "House",
+      "discriminator": [
+        21,
+        145,
+        94,
+        109,
+        254,
+        199,
+        210,
+        151
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "house_admin",
+            "type": "publicKey"
+          },
+          {
+            "name": "manager_collection",
+            "docs": [
+              "to create CAMPAIGNS"
+            ],
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "house_currency",
+            "docs": [
+              "paid to create CAMPAIGNS"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "house_currency_decimals",
+            "docs": [
+              "currency decimals"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "total_campaigns",
+            "docs": [
+              "total campaigns created"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "open_campaigns",
+            "docs": [
+              "open campaigns"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "unique_players",
+            "docs": [
+              "unique players in house"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "games_played",
+            "docs": [
+              "total games played in house"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "unclaimed_sol_fees",
+            "docs": [
+              "creation fees collected total"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "unclaimed_house_fees",
+            "docs": [
+              "house fees pending withdrawal"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "is_active",
+            "docs": [
+              "house fees pending withdrawal"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "_reserved1",
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          },
+          {
+            "name": "config",
+            "type": {
+              "defined": "HouseConfig"
+            }
+          },
+          {
+            "name": "_reserved2",
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          },
+          {
+            "name": "house_name",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProgramAdminProof",
+      "discriminator": [
+        66,
+        246,
+        26,
+        109,
+        109,
+        70,
+        195,
+        94
+      ],
+      "docs": [
+        "If the admin is set, the program will check if the caller is the admin, otherwise it should check if the caller is the program authority"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "program_admin",
+            "type": "publicKey"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "ProgramAuthorityMismatch",
+      "msg": "Signer does not match program authority"
+    },
+    {
+      "code": 6001,
+      "name": "CollectionProofInvalid",
+      "msg": "Collection Proof is invalid"
+    },
+    {
+      "code": 6002,
+      "name": "CollectionKeyMismatch",
+      "msg": "Collection Key Mismatch"
+    },
+    {
+      "code": 6003,
+      "name": "TokenOwnerMismatch",
+      "msg": "Caller does not own the token account"
+    },
+    {
+      "code": 6004,
+      "name": "UnexpectedMetadata",
+      "msg": "Unexpected metadata account"
+    },
+    {
+      "code": 6005,
+      "name": "MissingMetadata",
+      "msg": "Expected metadata account, none provided"
+    },
+    {
+      "code": 6006,
+      "name": "OwnerBalanceMismatch",
+      "msg": "Caller does not own the NFT"
+    },
+    {
+      "code": 6007,
+      "name": "MintNotNft",
+      "msg": "Mint is not an NFT"
+    },
+    {
+      "code": 6008,
+      "name": "OutOfEnergy",
+      "msg": "Energy depleted"
+    },
+    {
+      "code": 6009,
+      "name": "EnergyCalculationFailed",
+      "msg": "Energy calculation failed"
+    },
+    {
+      "code": 6010,
+      "name": "ClubInactive",
+      "msg": "Club inactive"
+    },
+    {
+      "code": 6011,
+      "name": "InvalidInput",
+      "msg": "Invalid input"
+    },
+    {
+      "code": 6012,
+      "name": "MetadataMismatch",
+      "msg": "Metadata does not match mint"
+    },
+    {
+      "code": 6013,
+      "name": "TaxTooHigh",
+      "msg": "Tax above 100%"
+    },
+    {
+      "code": 6014,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient funds"
+    },
+    {
+      "code": 6015,
+      "name": "AmountTooHigh",
+      "msg": "Amount too high"
+    },
+    {
+      "code": 6016,
+      "name": "NotClubAdmin",
+      "msg": "No Authority"
+    },
+    {
+      "code": 6017,
+      "name": "PlayerAlreadyInMatch",
+      "msg": "Player already in a match"
+    },
+    {
+      "code": 6018,
+      "name": "PlayerIdentityMismatch",
+      "msg": "Player identity mismatch"
+    },
+    {
+      "code": 6019,
+      "name": "StartsWithPunctuation",
+      "msg": "Name starts with punctuation"
+    },
+    {
+      "code": 6020,
+      "name": "StartsWithWhitespace",
+      "msg": "Name starts with whitespace"
+    },
+    {
+      "code": 6021,
+      "name": "EndsWithWhitespace",
+      "msg": "Name ends with whitespace"
+    },
+    {
+      "code": 6022,
+      "name": "InvalidCharacter",
+      "msg": "Invalid character in name"
+    },
+    {
+      "code": 6023,
+      "name": "ConsecutiveWhitespace",
+      "msg": "Consecutive whitespace in name"
+    },
+    {
+      "code": 6024,
+      "name": "StringTooLong",
+      "msg": "The string cannot be longer than 32 bytes"
+    },
+    {
+      "code": 6025,
+      "name": "StringTooShort",
+      "msg": "The string cannot be shorter than 4 bytes"
+    },
+    {
+      "code": 6026,
+      "name": "NonZeroVault",
+      "msg": "The vault must be empty"
+    },
+    {
+      "code": 6027,
+      "name": "ActiveCampaigns",
+      "msg": "Active campaigns exist"
+    },
+    {
+      "code": 6028,
+      "name": "ActiveCampaign",
+      "msg": "Campaign is active"
+    },
+    {
+      "code": 6029,
+      "name": "CampaignExpired",
+      "msg": "Campaign is expired"
+    },
+    {
+      "code": 6030,
+      "name": "InvalidTimeSpan",
+      "msg": "Invalid time span"
+    },
+    {
+      "code": 6031,
+      "name": "PlayerInGame",
+      "msg": "Player is already in a game"
+    },
+    {
+      "code": 6032,
+      "name": "OracleRequired",
+      "msg": "Oracle required"
+    },
+    {
+      "code": 6033,
+      "name": "OracleMismatch",
+      "msg": "Oracle mismatch"
+    },
+    {
+      "code": 6034,
+      "name": "RewardsUnavailable",
+      "msg": "Game cannot be started due to insufficient rewards"
+    },
+    {
+      "code": 6035,
+      "name": "NoStake",
+      "msg": "No stake on player"
+    }
+  ],
+  "types": [
+    {
+      "name": "BaseAssetV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": "Key"
+            }
+          },
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "update_authority",
+            "type": {
+              "defined": "UpdateAuthority"
+            }
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "seq",
+            "type": {
+              "option": "u64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Campaign",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "auth_bump",
+            "type": "u8"
+          },
+          {
+            "name": "house",
+            "type": "publicKey"
+          },
+          {
+            "name": "creator",
+            "type": "publicKey"
+          },
+          {
+            "name": "manager_mint",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "reward_mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "reward_mint_decimals",
+            "type": "u8"
+          },
+          {
+            "name": "max_rewards_per_game",
+            "type": "u64"
+          },
+          {
+            "name": "rewards_claim_fee",
+            "type": "u64"
+          },
+          {
+            "name": "player_count",
+            "type": "u32"
+          },
+          {
+            "name": "active_games",
+            "type": "u32"
+          },
+          {
+            "name": "total_games",
+            "type": "u32"
+          },
+          {
+            "name": "time_span",
+            "type": {
+              "defined": "TimeSpan"
+            }
+          },
+          {
+            "name": "house_config_snapshot",
+            "type": {
+              "defined": "HouseConfig"
+            }
+          },
+          {
+            "name": "nft_config",
+            "type": {
+              "option": {
+                "defined": "NftCampaignConfig"
+              }
+            }
+          },
+          {
+            "name": "unclaimed_sol_fees",
+            "type": "u64"
+          },
+          {
+            "name": "_reserved_config",
+            "type": {
+              "array": [
+                "u64",
+                7
+              ]
+            }
+          },
+          {
+            "name": "token_config",
+            "type": {
+              "option": {
+                "defined": "TokenCampaignConfig"
+              }
+            }
+          },
+          {
+            "name": "_reserved_for_token",
+            "type": {
+              "array": [
+                "u64",
+                3
+              ]
+            }
+          },
+          {
+            "name": "rewards_available",
+            "type": "u64"
+          },
+          {
+            "name": "reserved_rewards",
+            "type": "u64"
+          },
+          {
+            "name": "campaign_name",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": {
+              "option": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignPlayer",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "player_identity",
+            "type": {
+              "defined": "PlayerIdentity"
+            }
+          },
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "house",
+            "type": "publicKey"
+          },
+          {
+            "name": "energy",
+            "type": "u8"
+          },
+          {
+            "name": "recharge_start_time",
+            "type": "i64"
+          },
+          {
+            "name": "game_start_time",
+            "type": "i64"
+          },
+          {
+            "name": "games_played",
+            "type": "u32"
+          },
+          {
+            "name": "in_game",
+            "type": "bool"
+          },
+          {
+            "name": "rewards_claimed",
+            "type": "u64"
+          },
+          {
+            "name": "stake_info",
+            "type": {
+              "option": {
+                "defined": "StakeInfo"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "House",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "house_admin",
+            "type": "publicKey"
+          },
+          {
+            "name": "manager_collection",
+            "docs": [
+              "to create CAMPAIGNS"
+            ],
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "house_currency",
+            "docs": [
+              "paid to create CAMPAIGNS"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "house_currency_decimals",
+            "docs": [
+              "currency decimals"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "total_campaigns",
+            "docs": [
+              "total campaigns created"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "open_campaigns",
+            "docs": [
+              "open campaigns"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "unique_players",
+            "docs": [
+              "unique players in house"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "games_played",
+            "docs": [
+              "total games played in house"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "unclaimed_sol_fees",
+            "docs": [
+              "creation fees collected total"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "unclaimed_house_fees",
+            "docs": [
+              "house fees pending withdrawal"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "is_active",
+            "docs": [
+              "house fees pending withdrawal"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "_reserved1",
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          },
+          {
+            "name": "config",
+            "type": {
+              "defined": "HouseConfig"
+            }
+          },
+          {
+            "name": "_reserved2",
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          },
+          {
+            "name": "house_name",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HouseConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "oracle_key",
+            "type": "publicKey"
+          },
+          {
+            "name": "campaign_creation_fee",
+            "type": "u64"
+          },
+          {
+            "name": "campaign_manager_discount",
+            "type": "u64"
+          },
+          {
+            "name": "claim_fee",
+            "type": "u64"
+          },
+          {
+            "name": "rewards_tax",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IdentityType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "Nft"
+          },
+          {
+            "name": "User"
+          },
+          {
+            "name": "MplCore"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Key",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Uninitialized"
+          },
+          {
+            "name": "AssetV1"
+          },
+          {
+            "name": "HashedAssetV1"
+          },
+          {
+            "name": "PluginHeaderV1"
+          },
+          {
+            "name": "PluginRegistryV1"
+          },
+          {
+            "name": "CollectionV1"
+          }
+        ]
+      }
+    },
+    {
+      "name": "NftCampaignConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "collection",
+            "type": "publicKey"
+          },
+          {
+            "name": "max_player_energy",
+            "type": "u8"
+          },
+          {
+            "name": "energy_recharge_minutes",
+            "type": {
+              "option": "i64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "PlayerIdentity",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "identity_type",
+            "type": {
+              "defined": "IdentityType"
+            }
+          },
+          {
+            "name": "pubkey",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProgramAdminProof",
+      "docs": [
+        "If the admin is set, the program will check if the caller is the admin, otherwise it should check if the caller is the program authority"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "program_admin",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StakeInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "campaign_end_time",
+            "type": "i64"
+          },
+          {
+            "name": "staked_mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "staked_mint_decimals",
+            "type": "u8"
+          },
+          {
+            "name": "campaign_name",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TimeSpan",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "start_time",
+            "type": "i64"
+          },
+          {
+            "name": "end_time",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenCampaignConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "spending_mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "energy_price",
+            "type": "u64"
+          },
+          {
+            "name": "spending_mint_decimals",
+            "type": "u8"
+          },
+          {
+            "name": "token_use",
+            "type": {
+              "defined": "TokenUse"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenUse",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Stake"
+          },
+          {
+            "name": "Burn"
+          },
+          {
+            "name": "Pay"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateAuthority",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "Address",
+            "fields": [
+              "pubkey"
+            ]
+          },
+          {
+            "name": "Collection",
+            "fields": [
+              "pubkey"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

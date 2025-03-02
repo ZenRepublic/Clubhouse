@@ -14,7 +14,6 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
     time_span: TimeSpan, 
     nft_campaign_config: Option<NftCampaignConfig>, 
     token_campaign_config: Option<TokenCampaignConfig>) -> Result<()> {
-    let campaign = &mut ctx.accounts.campaign;
     validate_string(&campaign_name)?;
     let clock = Clock::get()?;
     let ts_now = clock.unix_timestamp;
@@ -47,30 +46,29 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
         
     };
 
-    campaign.set_inner(Campaign {
-        auth_bump: ctx.bumps.campaign_auth,
-        reward_mint: ctx.accounts.reward_mint.key(),
-        reward_mint_decimals: ctx.accounts.reward_mint.decimals,
-        house: ctx.accounts.house.key(),
-        campaign_name: campaign_name,
-        uri: uri,
-        house_config_snapshot: ctx.accounts.house.config.clone(),
-        nft_config: nft_campaign_config,
-        token_config: token_campaign_config,
-        time_span: time_span,
-        creator: ctx.accounts.signer.key(),
-        max_rewards_per_game: max_rewards_per_game,
-        rewards_claim_fee: player_claim_price,
-        rewards_available: fund_amount,
-        manager_mint: None,
-        player_count: 0,
-        active_games: 0,
-        total_games: 0,
-        unclaimed_sol_fees: 0,
-        _reserved_config: [0; 7],
-        _reserved_for_token: [0; 3],
-        reserved_rewards: 0,
-    });
+    let campaign = &mut ctx.accounts.campaign;
+    campaign.auth_bump = ctx.bumps.campaign_auth;
+    campaign.reward_mint = ctx.accounts.reward_mint.key();
+    campaign.reward_mint_decimals = ctx.accounts.reward_mint.decimals;
+    campaign.house = ctx.accounts.house.key();
+    campaign.campaign_name = campaign_name;
+    campaign.uri = uri;
+    campaign.house_config_snapshot = ctx.accounts.house.config.clone();
+    campaign.nft_config = nft_campaign_config;
+    campaign.token_config = token_campaign_config;
+    campaign.time_span = time_span;
+    campaign.creator = ctx.accounts.signer.key();
+    campaign.max_rewards_per_game = max_rewards_per_game;
+    campaign.rewards_claim_fee = player_claim_price;
+    campaign.rewards_available = fund_amount;
+    campaign.manager_mint = None;
+    campaign.player_count = 0;
+    campaign.active_games = 0;
+    campaign.total_games = 0;
+    campaign.unclaimed_sol_fees = 0;
+    campaign._reserved_config = [0; 7];
+    campaign._reserved_for_token = [0; 3];
+    campaign.reserved_rewards = 0;
 
     ctx.accounts.house.add_campaign();
     let fee = ctx.accounts.house.config.campaign_creation_fee;

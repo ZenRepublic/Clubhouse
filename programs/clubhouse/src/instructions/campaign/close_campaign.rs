@@ -78,7 +78,7 @@ pub struct CloseCampaign<'info> {
         seeds=[b"rewards", campaign.key().as_ref()], 
         bump
     )]
-    pub reward_vault: InterfaceAccount<'info, TokenAccount>,
+    pub reward_vault: Box<InterfaceAccount<'info, TokenAccount>>,
     #[account(mut)]
     pub house: Box<Account<'info, House>>,
     #[account(mut)]
