@@ -7,11 +7,12 @@ use crate::{errors::ErrorCodes, Campaign, CampaignPlayer, House};
 pub fn end_game(ctx: Context<EndGame>, amount_won: u64) -> Result<()> {
     ctx.accounts.validate_core_nft()?;
     let campaign_player = &mut ctx.accounts.campaign_player;
-    match (ctx.accounts.campaign.nft_config, &ctx.accounts.player_nft_metadata, &ctx.accounts.player_nft_token_account) {
-        (None, None, None) => {},
-        (Some(_), Some(_), Some(_)) => {},
-        (Some(_), _, _) => return err!(ErrorCodes::MissingMetadata),
-        (None, _, _) => return err!(ErrorCodes::UnexpectedMetadata),
+    match (ctx.accounts.campaign.nft_config, &ctx.accounts.player_nft_metadata, &ctx.accounts.player_nft_token_account, &ctx.accounts.player_core_nft) {
+        (None, None, None, None) => {},
+        (Some(_), Some(_), Some(_), None) => {},
+        (Some(_) , None, None, Some(_)) => {},
+        (None, _, _, _) => return err!(ErrorCodes::InvalidInput),
+        (Some(_), _, _, _) => return err!(ErrorCodes::UnexpectedMetadata),
         
     }
 
@@ -172,7 +173,7 @@ impl EndGame<'_> {
              identity_type: IdentityType::Nft,
              pubkey: metadata.mint
             }),
-            (None, None, Some(nft)) => Ok(PlayerIdentity{
+            (Some(_), None, Some(nft)) => Ok(PlayerIdentity{
                 identity_type: IdentityType::MplCore,
                 pubkey: nft.key()
             }),

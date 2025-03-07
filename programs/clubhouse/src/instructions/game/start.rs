@@ -53,7 +53,10 @@ pub fn start_game(ctx: Context<StartGame>) -> Result<()> {
                 }
             }
         },
-        (Some(_), None, IdentityType::Nft | IdentityType::MplCore, Some(_)) => {
+        (Some(_), None, IdentityType::Nft, Some(_)) => {
+            
+        },
+        (Some(_), None, IdentityType::MplCore, None) => {
             
         },
 
@@ -180,7 +183,7 @@ impl StartGame<'_> {
              identity_type: IdentityType::Nft,
              pubkey: metadata.mint
             }),
-            (None, None, Some(nft)) => Ok(PlayerIdentity{
+            (Some(_), None, Some(nft)) => Ok(PlayerIdentity{
                 identity_type: IdentityType::MplCore,
                 pubkey: nft.key()
             }),
