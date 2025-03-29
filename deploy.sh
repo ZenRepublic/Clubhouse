@@ -1,1 +1,0 @@
-solana program deploy --program-id target/deploy/clubhouse-keypair.json target/deploy/clubhouse.so --with-compute-unit-price 100000 --use-rpc --max-sign-attempts 100
