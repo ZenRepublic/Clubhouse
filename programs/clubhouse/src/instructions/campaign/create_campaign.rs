@@ -1,8 +1,7 @@
-
 use anchor_lang::prelude::*;
-use anchor_spl::{token_interface::TokenInterface, token_interface::{Mint, TokenAccount}};
+use anchor_spl::{token_interface::TokenInterface, token_interface::{Mint, TokenAccount}, metadata::MetadataAccount};
 
-use crate::{errors::{self, ErrorCodes}, execute_token_transfer, string_len_borsh, string_option_len, validate_string, Campaign, House, NftCampaignConfig, TimeSpan, TokenCampaignConfig, TokenUse};
+use crate::{errors::{self, ErrorCodes}, execute_token_transfer, metadata_is_collection, state::ManagerSlot, string_len_borsh, string_option_len, validate_string, Campaign, House, NftCampaignConfig, TimeSpan, TokenCampaignConfig, TokenUse};
 
 
 pub fn create_campaign(ctx: Context<CreateCampaign>,
@@ -18,6 +17,7 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
     let clock = Clock::get()?;
     let ts_now = clock.unix_timestamp;
 
+
     if time_span.is_expired(ts_now) {
         return err!(errors::ErrorCodes::CampaignExpired);
     }
@@ -25,6 +25,38 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
     if !time_span.is_valid() {
         return err!(errors::ErrorCodes::InvalidTimeSpan);
     }
+
+    // Validate manager NFT if provided
+    let mut signer_must_pay = true;
+    if ctx.accounts.signer.key() != ctx.accounts.house.house_admin {
+    if ctx.accounts.house.manager_collection.is_some() {
+            require!(ctx.accounts.manager_nft_token_account.is_some(), ErrorCodes::MetadataMismatch);
+            require!(ctx.accounts.manager_nft_metadata.is_some(), ErrorCodes::MetadataMismatch);
+            
+            let token_account = ctx.accounts.manager_nft_token_account.as_ref().unwrap();
+            require!(token_account.owner == ctx.accounts.signer.key(), ErrorCodes::TokenOwnerMismatch);
+            require!(token_account.amount == 1, ErrorCodes::OwnerBalanceMismatch);
+            
+            let metadata = ctx.accounts.manager_nft_metadata.as_ref().unwrap();
+            require!(metadata_is_collection(metadata, &ctx.accounts.house.manager_collection.unwrap()).is_ok(), ErrorCodes::CollectionProofInvalid);
+            require!(ctx.accounts.manager_slot.is_some(), ErrorCodes::InvalidInput);
+            signer_must_pay = false;
+            ctx.accounts.manager_slot.as_mut().unwrap().manager = ctx.accounts.manager_nft_metadata.as_ref().unwrap().mint;
+            ctx.accounts.manager_slot.as_mut().unwrap().campaign = ctx.accounts.campaign.key();
+
+
+        }
+        else {
+            require!(ctx.accounts.manager_nft_token_account.is_none(), ErrorCodes::InvalidInput);
+            require!(ctx.accounts.manager_nft_metadata.is_none(), ErrorCodes::InvalidInput);
+            require!(ctx.accounts.manager_slot.is_none(), ErrorCodes::InvalidInput);
+            require!(ctx.accounts.creation_fee_account.is_some(), ErrorCodes::InvalidInput);
+        }
+    }
+    else {
+        signer_must_pay = false;
+    }
+    
 
     match token_campaign_config {
         Some(token_config) => {
@@ -71,13 +103,16 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
     campaign.reserved_rewards = 0;
 
     ctx.accounts.house.add_campaign();
-    let fee = ctx.accounts.house.config.campaign_creation_fee;
+    let fee = match signer_must_pay {
+        true => ctx.accounts.house.config.campaign_creation_fee,
+        false => 0
+    };
+    
     ctx.accounts.house.unclaimed_house_fees += fee;
-    if fee > ctx.accounts.creation_fee_account.amount { return err!(ErrorCodes::InsufficientFunds)}
     if fee > 0 {
         execute_token_transfer(
             fee, 
-            ctx.accounts.creation_fee_account.to_account_info(), 
+            ctx.accounts.creation_fee_account.as_ref().unwrap().to_account_info(), 
             ctx.accounts.house_vault.to_account_info(), 
             ctx.accounts.signer.to_account_info(), 
             ctx.accounts.token_program.to_account_info(),
@@ -103,8 +138,7 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
     campaign_name: String, 
     uri: Option<String>,)]
 pub struct CreateCampaign<'info> {
-    // for now, the campaign creator must be the house admin
-    #[account(mut, constraint = signer.key() == house.house_admin)]
+    #[account(mut)]
     pub signer: Signer<'info>,
 
     #[account(init, payer=signer, space=8+472+string_len_borsh(&campaign_name)+string_option_len(&uri))]
@@ -119,14 +153,13 @@ pub struct CreateCampaign<'info> {
 
     /// pays the campaign creation fees
     #[account(mut)]
-    pub creation_fee_account: Box<InterfaceAccount<'info, TokenAccount>>,
+    pub creation_fee_account: Option<Box<InterfaceAccount<'info, TokenAccount>>>,
 
     pub reward_mint: Box<InterfaceAccount<'info, Mint>>,
 
     /// the vault where we pay the campaign creation fees
     #[account(mut,seeds=[b"vault",house.key().as_ref()], bump)]
     pub house_vault: Box<InterfaceAccount<'info, TokenAccount>>,
-
 
     /// the account that deposits rewards for the campaign
     #[account(mut)]
@@ -143,7 +176,6 @@ pub struct CreateCampaign<'info> {
     )]
     pub reward_vault: Box<InterfaceAccount<'info, TokenAccount>>,
 
-    
     pub game_mint: Option<Box<InterfaceAccount<'info, Mint>>>,
     #[account(
         init, 
@@ -158,4 +190,21 @@ pub struct CreateCampaign<'info> {
     pub token_program: Interface<'info, TokenInterface>,
 
     pub system_program: Program<'info, System>,
+
+    /// Optional manager NFT token account
+    pub manager_nft_token_account: Option<Box<InterfaceAccount<'info, TokenAccount>>>,
+
+    /// Optional manager NFT metadata
+    pub manager_nft_metadata: Option<Box<Account<'info, MetadataAccount>>>,
+
+    #[account(
+        init,
+        space= 8+32+32,
+        payer=signer,
+        seeds=[b"manager_slot", manager_nft_metadata.as_ref().unwrap().mint.key().as_ref()], bump,
+        constraint = house.manager_collection.is_some() @ ErrorCodes::InvalidInput,
+        constraint = metadata_is_collection(&manager_nft_metadata.as_ref().unwrap(),&house.manager_collection.unwrap()).is_ok() @ ErrorCodes::CollectionProofInvalid
+        
+    )]
+    pub manager_slot: Option<Account<'info,ManagerSlot>>,
 }

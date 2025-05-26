@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{associated_token::AssociatedToken, metadata::MetadataAccount, token::{Mint, Token, TokenAccount}};
-use crate::{execute_lamport_transfer, execute_token_transfer, metadata_contains, state::{SimplifiedAssetV1, UpdateAuthority}, IdentityType, PlayerIdentity};
+use crate::{execute_lamport_transfer, execute_token_transfer, metadata_is_collection, state::{SimplifiedAssetV1, UpdateAuthority}, IdentityType, PlayerIdentity};
 
 use crate::{errors::ErrorCodes, Campaign, CampaignPlayer, House};
 
@@ -108,7 +108,7 @@ pub struct EndGame<'info> {
     pub player_nft_token_account: Option<Box<Account<'info, TokenAccount>>>,
 
 
-    #[account(constraint = metadata_contains(&player_nft_metadata,&campaign.nft_config.unwrap().collection).is_ok())]
+    #[account(constraint = metadata_is_collection(&player_nft_metadata,&campaign.nft_config.unwrap().collection).is_ok())]
     pub player_nft_metadata: Option<Box<Account<'info, MetadataAccount>>>,
 
     /// CHECK: Custom validation for mpl-core asset

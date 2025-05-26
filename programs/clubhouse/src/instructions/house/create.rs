@@ -4,7 +4,7 @@ use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
 use crate::{House, HouseConfig};
 
 
-pub fn create_house(ctx: Context<CreateHouse>, manager_collection: Option<Pubkey>, house_config: HouseConfig, house_name: String) -> Result<()> {
+pub fn create_house(ctx: Context<CreateHouse>, manager_collection: Option<Pubkey>, house_config: HouseConfig, house_name: String, uri: String) -> Result<()> {
     
     ctx.accounts.house.initialize(
         ctx.accounts.house_admin.key(),
@@ -13,7 +13,8 @@ pub fn create_house(ctx: Context<CreateHouse>, manager_collection: Option<Pubkey
         ctx.accounts.house_currency_mint.decimals,
         house_config,
         house_name,
-        ctx.bumps.house
+        uri,
+        ctx.bumps.house,
     )?;
     Ok(())
 }

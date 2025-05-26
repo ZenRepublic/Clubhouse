@@ -17,8 +17,8 @@ pub mod clubhouse {
 
     use super::*;
 
-    pub fn create_house(ctx: Context<CreateHouse>, manager_collection: Option<Pubkey>, house_config: HouseConfig, house_name: String) -> Result<()> {
-        house::create::create_house(ctx, manager_collection, house_config, house_name)
+    pub fn create_house(ctx: Context<CreateHouse>, manager_collection: Option<Pubkey>, house_config: HouseConfig, house_name: String, uri: String) -> Result<()> {
+        house::create::create_house(ctx, manager_collection, house_config, house_name, uri)
     }
 
     pub fn update_house(ctx: Context<UpdateHouse>, house_config: HouseConfig) -> Result<()> {

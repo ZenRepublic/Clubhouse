@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
-use anchor_spl::{associated_token::AssociatedToken, token_interface::{Mint, TokenAccount, TokenInterface}};
+use anchor_spl::{associated_token::AssociatedToken, metadata::MetadataAccount, token_interface::{Mint, TokenAccount, TokenInterface}};
 
-use crate::{errors, execute_token_close, execute_token_transfer, Campaign, House, TokenUse};
+use crate::{errors::{self, ErrorCodes}, execute_token_close, execute_token_transfer, state::{metadata_is_collection, ManagerSlot}, Campaign, House, TokenUse};
 
 pub fn close_campaign(ctx: Context<CloseCampaign>) -> Result<()> {
     if false &&ctx.accounts.campaign.time_span.is_active(Clock::get()?.unix_timestamp) {
@@ -103,4 +103,21 @@ pub struct CloseCampaign<'info> {
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub reward_token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
+
+
+    /// Optional manager NFT token account
+    pub manager_nft_token_account: Option<Box<InterfaceAccount<'info, TokenAccount>>>,
+
+    /// Optional manager NFT metadata
+    pub manager_nft_metadata: Option<Box<Account<'info, MetadataAccount>>>,
+
+    #[account(
+        mut,
+        close=creator,
+        seeds=[b"manager_slot", manager_nft_metadata.as_ref().unwrap().mint.key().as_ref()], bump,
+        constraint = house.manager_collection.is_some() @ ErrorCodes::InvalidInput,
+        constraint = metadata_is_collection(&manager_nft_metadata.as_ref().unwrap(),&house.manager_collection.unwrap()).is_ok() @ ErrorCodes::CollectionProofInvalid
+
+    )]
+    pub manager_proof: Option<Account<'info,ManagerSlot>>,
 }

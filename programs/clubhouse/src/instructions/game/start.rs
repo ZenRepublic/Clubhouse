@@ -2,7 +2,7 @@ use std::ops::AddAssign;
 
 use anchor_lang::prelude::*;
 use anchor_spl::{metadata::MetadataAccount, token_interface::{Mint, TokenAccount, TokenInterface}};
-use crate::{errors, execute_token_burn, execute_token_transfer, metadata_contains, state::{SimplifiedAssetV1, UpdateAuthority}, IdentityType, PlayerIdentity, StakeInfo, TokenUse};
+use crate::{errors, execute_token_burn, execute_token_transfer, metadata_is_collection, state::{SimplifiedAssetV1, UpdateAuthority}, IdentityType, PlayerIdentity, StakeInfo, TokenUse};
 
 use crate::{errors::ErrorCodes, Campaign, CampaignPlayer, House};
 
@@ -132,7 +132,7 @@ pub struct StartGame<'info> {
     pub player_nft_token_account: Option<Box<InterfaceAccount<'info, TokenAccount>>>,
 
 
-    #[account(constraint = metadata_contains(&player_nft_metadata,&campaign.nft_config.unwrap().collection).is_ok())]
+    #[account(constraint = metadata_is_collection(&player_nft_metadata,&campaign.nft_config.unwrap().collection).is_ok())]
     pub player_nft_metadata: Option<Box<Account<'info, MetadataAccount>>>,
 
     #[account(mut)]

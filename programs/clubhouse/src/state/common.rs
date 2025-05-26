@@ -2,7 +2,7 @@ use crate::errors::ErrorCodes;
 use anchor_lang::prelude::*;
 use anchor_spl::metadata::MetadataAccount;
 
-pub fn metadata_contains(metadata: &MetadataAccount, pk: &Pubkey) -> Result<()> {
+pub fn metadata_is_collection(metadata: &MetadataAccount, pk: &Pubkey) -> Result<()> {
     let collection = &metadata.collection;
     if collection.is_some() && collection.as_ref().unwrap().verified && collection.as_ref().unwrap().key.eq(&pk)  {
         return Ok(());

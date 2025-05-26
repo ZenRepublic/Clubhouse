@@ -10,13 +10,17 @@ pub struct ProgramAdminProof {
 }
 
 #[account]
-
 #[derive(InitSpace)]
+pub struct ManagerSlot {
+    pub manager: Pubkey,
+    pub campaign: Pubkey,
+}
+
+#[account]
 pub struct Campaign {
     pub auth_bump: u8, 
     pub house: Pubkey,
     pub creator: Pubkey,
-    //unused
     pub manager_mint: Option<Pubkey>, 
     pub reward_mint: Pubkey,
     pub reward_mint_decimals: u8,
@@ -34,9 +38,7 @@ pub struct Campaign {
     pub _reserved_for_token: [u64; 3],
     pub rewards_available: u64,
     pub reserved_rewards: u64,
-    #[max_len(32)]
     pub campaign_name: String,
-    #[max_len(200)]
     pub uri: Option<String>,
 }
 
@@ -74,6 +76,10 @@ pub struct House {
 
     #[max_len(32)]
     pub house_name: String,
+
+    #[max_len(256)]
+    /// optional URI for the house, can be used to store metadata
+    pub uri: Option<String>,
 }
 
 impl House {
@@ -85,6 +91,7 @@ impl House {
         house_currency_decimals: u8,
         config: HouseConfig,
         house_name: String,
+        uri: String,
         bump: u8,
     ) -> Result<()>{
         crate::common::validate_string(&house_name)?;
@@ -96,6 +103,7 @@ impl House {
         self.house_name = house_name;
         self.bump = bump;
         self.is_active = true;
+        self.uri = Some(uri);
         Ok(())
     }
 
