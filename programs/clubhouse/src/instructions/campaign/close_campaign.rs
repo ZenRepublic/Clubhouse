@@ -114,10 +114,10 @@ pub struct CloseCampaign<'info> {
     #[account(
         mut,
         close=creator,
-        seeds=[b"manager_slot", manager_nft_metadata.as_ref().unwrap().mint.key().as_ref()], bump,
+        seeds=[b"manager_slot", house.key().as_ref(), manager_nft_metadata.as_ref().unwrap().mint.key().as_ref()], bump,
         constraint = house.manager_collection.is_some() @ ErrorCodes::InvalidInput,
         constraint = metadata_is_collection(&manager_nft_metadata.as_ref().unwrap(),&house.manager_collection.unwrap()).is_ok() @ ErrorCodes::CollectionProofInvalid
 
     )]
-    pub manager_proof: Option<Account<'info,ManagerSlot>>,
+    pub manager_slot: Option<Account<'info,ManagerSlot>>,
 }

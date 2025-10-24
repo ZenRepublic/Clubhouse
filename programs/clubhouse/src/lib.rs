@@ -17,12 +17,12 @@ pub mod clubhouse {
 
     use super::*;
 
-    pub fn create_house(ctx: Context<CreateHouse>, manager_collection: Option<Pubkey>, house_config: HouseConfig, house_name: String, uri: String) -> Result<()> {
+    pub fn create_house(ctx: Context<CreateHouse>, manager_collection: Option<Pubkey>, house_config: HouseConfig, house_name: String, uri: Option<String>) -> Result<()> {
         house::create::create_house(ctx, manager_collection, house_config, house_name, uri)
     }
 
-    pub fn update_house(ctx: Context<UpdateHouse>, house_config: HouseConfig) -> Result<()> {
-        house::update::update_house(ctx, house_config)
+    pub fn update_house(ctx: Context<UpdateHouse>, house_config: HouseConfig, uri: Option<String>) -> Result<()> {
+        house::update::update_house(ctx, house_config, uri)
     }
 
     pub fn withdraw_house_fees(ctx: Context<WithdrawHouseFees>) -> Result<()> {
@@ -37,8 +37,8 @@ pub mod clubhouse {
         program_admin::add::add_program_admin(ctx)
     }
 
-    pub fn create_campaign(ctx: Context<CreateCampaign>, campaign_name: String, custom_data: Option<String>, fund_amount: u64, max_rewards_per_game: u64, player_claim_price: u64, time_span: TimeSpan, nft_config: Option<NftCampaignConfig>, token_config: Option<TokenCampaignConfig>) -> Result<()> {
-        campaign::create_campaign(ctx, campaign_name, custom_data, fund_amount, max_rewards_per_game, player_claim_price, time_span, nft_config, token_config)
+    pub fn create_campaign(ctx: Context<CreateCampaign>, campaign_name: String, custom_data: Option<String>, fund_amount: u64, max_rewards_per_game: u64, player_claim_price: u64, time_span: TimeSpan, nft_config: Option<NftCampaignConfig>, token_config: Option<TokenCampaignConfig>, burn_remainder: bool) -> Result<()> {
+        campaign::create_campaign(ctx, campaign_name, custom_data, fund_amount, max_rewards_per_game, player_claim_price, time_span, nft_config, token_config, burn_remainder)
     }
 
     pub fn close_campaign(ctx: Context<CloseCampaign>) -> Result<()> {

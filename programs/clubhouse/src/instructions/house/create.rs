@@ -4,7 +4,7 @@ use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
 use crate::{House, HouseConfig};
 
 
-pub fn create_house(ctx: Context<CreateHouse>, manager_collection: Option<Pubkey>, house_config: HouseConfig, house_name: String, uri: String) -> Result<()> {
+pub fn create_house(ctx: Context<CreateHouse>, manager_collection: Option<Pubkey>, house_config: HouseConfig, house_name: String, uri: Option<String>) -> Result<()> {
     
     ctx.accounts.house.initialize(
         ctx.accounts.house_admin.key(),
@@ -21,7 +21,7 @@ pub fn create_house(ctx: Context<CreateHouse>, manager_collection: Option<Pubkey
 
 
 #[derive(Accounts)]
-#[instruction(manager_collection: Option<Pubkey>, house_config: HouseConfig, house_name: String)]
+#[instruction(manager_collection: Option<Pubkey>, house_config: HouseConfig, house_name: String, uri: Option<String>)]
 
 pub struct CreateHouse<'info> {
 
@@ -29,7 +29,7 @@ pub struct CreateHouse<'info> {
     pub program_admin: Signer<'info>,
     #[account(seeds=[b"program_admin", program_admin.key().as_ref()], bump, has_one=program_admin)]
     pub program_admin_proof: Account<'info, crate::state::ProgramAdminProof>,
-    #[account(init, payer=program_admin, space=8+492, seeds=[b"house", house_name.as_bytes().as_ref()], bump)]
+    #[account(init, payer=program_admin, space=8+504+match uri { Some(s) => s.len() + 4, None => 4 }, seeds=[b"house", house_name.as_bytes().as_ref()], bump)]
     pub house: Box<Account<'info, House>>,
     /// CHECK: signing pda for house
     #[account(mut, seeds=[house.key().as_ref()], bump)]

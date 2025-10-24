@@ -74,4 +74,6 @@ pub enum ErrorCodes {
     RewardsUnavailable,
     #[msg("No stake on player")]
     NoStake,
+    #[msg("Manager token account required")]
+    ManagerTokenAccountRequired,
 }

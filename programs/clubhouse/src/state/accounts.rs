@@ -10,10 +10,11 @@ pub struct ProgramAdminProof {
 }
 
 #[account]
-#[derive(InitSpace)]
+#[derive(InitSpace, Debug)]
 pub struct ManagerSlot {
     pub manager: Pubkey,
     pub campaign: Pubkey,
+    pub house: Pubkey,
 }
 
 #[account]
@@ -21,7 +22,7 @@ pub struct Campaign {
     pub auth_bump: u8, 
     pub house: Pubkey,
     pub creator: Pubkey,
-    pub manager_mint: Option<Pubkey>, 
+    pub manager_identity: PlayerIdentity, 
     pub reward_mint: Pubkey,
     pub reward_mint_decimals: u8,
     pub max_rewards_per_game: u64,
@@ -35,7 +36,9 @@ pub struct Campaign {
     pub unclaimed_sol_fees: u64,
     pub _reserved_config: [u64; 7],
     pub token_config: Option<TokenCampaignConfig>,
-    pub _reserved_for_token: [u64; 3],
+    pub _reserved_for_token: [u64; 2],
+    pub _reserved_bytes: [u8; 7],
+    pub burn_remainder: bool,
     pub rewards_available: u64,
     pub reserved_rewards: u64,
     pub campaign_name: String,
@@ -91,7 +94,7 @@ impl House {
         house_currency_decimals: u8,
         config: HouseConfig,
         house_name: String,
-        uri: String,
+        uri: Option<String>,
         bump: u8,
     ) -> Result<()>{
         crate::common::validate_string(&house_name)?;
@@ -103,7 +106,7 @@ impl House {
         self.house_name = house_name;
         self.bump = bump;
         self.is_active = true;
-        self.uri = Some(uri);
+        self.uri = uri;
         Ok(())
     }
 

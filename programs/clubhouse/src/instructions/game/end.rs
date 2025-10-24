@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{associated_token::AssociatedToken, metadata::MetadataAccount, token::{Mint, Token, TokenAccount}};
-use crate::{execute_lamport_transfer, execute_token_transfer, metadata_is_collection, state::{SimplifiedAssetV1, UpdateAuthority}, IdentityType, PlayerIdentity};
+use crate::{execute_lamport_transfer, execute_token_transfer, instructions::execute_token_burn, metadata_is_collection, state::{SimplifiedAssetV1, UpdateAuthority}, IdentityType, PlayerIdentity};
 
 use crate::{errors::ErrorCodes, Campaign, CampaignPlayer, House};
 
@@ -62,6 +62,19 @@ pub fn end_game(ctx: Context<EndGame>, amount_won: u64) -> Result<()> {
             ctx.accounts.campaign.unclaimed_sol_fees += ctx.accounts.campaign.rewards_claim_fee;
         }
     }
+    if ctx.accounts.campaign.burn_remainder {
+        let remainder = ctx.accounts.campaign.max_rewards_per_game.saturating_sub(amount_won);
+        if remainder > 0 {
+            execute_token_burn(remainder,
+                ctx.accounts.reward_mint.to_account_info(),
+                ctx.accounts.reward_vault.to_account_info(),
+                ctx.accounts.campaign_auth.to_account_info(),
+                ctx.accounts.token_program.to_account_info(), 
+                Some(&[&[ctx.accounts.campaign.key().as_ref(),&[ctx.accounts.campaign.auth_bump]]]))?;
+        }
+        ctx.accounts.campaign.rewards_available = ctx.accounts.campaign.rewards_available - remainder;
+
+    }
     campaign_player.in_game = false;
     campaign_player.games_played += 1;
     campaign_player.rewards_claimed += amount_won;
@@ -115,7 +128,7 @@ pub struct EndGame<'info> {
     #[account()]
     pub player_core_nft: Option<AccountInfo<'info>>,
 
-    #[account()]
+    #[account(mut)]
     pub reward_mint: Box<Account<'info, Mint>>,
 
     #[account(

@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{token_interface::TokenInterface, token_interface::{Mint, TokenAccount}, metadata::MetadataAccount};
 
-use crate::{errors::{self, ErrorCodes}, execute_token_transfer, metadata_is_collection, state::ManagerSlot, string_len_borsh, string_option_len, validate_string, Campaign, House, NftCampaignConfig, TimeSpan, TokenCampaignConfig, TokenUse};
+use crate::{errors::{self, ErrorCodes}, execute_token_transfer, metadata_is_collection, state::{ManagerSlot, PlayerIdentity, SimplifiedAssetV1, UpdateAuthority}, string_len_borsh, string_option_len, validate_string, Campaign, House, NftCampaignConfig, TimeSpan, TokenCampaignConfig, TokenUse};
 
 
 pub fn create_campaign(ctx: Context<CreateCampaign>,
@@ -10,9 +10,10 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
     fund_amount: u64, 
     max_rewards_per_game: u64, 
     player_claim_price: u64, 
-    time_span: TimeSpan, 
+    time_span: TimeSpan,
     nft_campaign_config: Option<NftCampaignConfig>, 
-    token_campaign_config: Option<TokenCampaignConfig>) -> Result<()> {
+    token_campaign_config: Option<TokenCampaignConfig>,
+    burn_remainder: bool) -> Result<()> {
     validate_string(&campaign_name)?;
     let clock = Clock::get()?;
     let ts_now = clock.unix_timestamp;
@@ -28,31 +29,35 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
 
     // Validate manager NFT if provided
     let mut signer_must_pay = true;
-    if ctx.accounts.signer.key() != ctx.accounts.house.house_admin {
-    if ctx.accounts.house.manager_collection.is_some() {
-            require!(ctx.accounts.manager_nft_token_account.is_some(), ErrorCodes::MetadataMismatch);
-            require!(ctx.accounts.manager_nft_metadata.is_some(), ErrorCodes::MetadataMismatch);
-            
-            let token_account = ctx.accounts.manager_nft_token_account.as_ref().unwrap();
-            require!(token_account.owner == ctx.accounts.signer.key(), ErrorCodes::TokenOwnerMismatch);
-            require!(token_account.amount == 1, ErrorCodes::OwnerBalanceMismatch);
-            
-            let metadata = ctx.accounts.manager_nft_metadata.as_ref().unwrap();
-            require!(metadata_is_collection(metadata, &ctx.accounts.house.manager_collection.unwrap()).is_ok(), ErrorCodes::CollectionProofInvalid);
-            require!(ctx.accounts.manager_slot.is_some(), ErrorCodes::InvalidInput);
-            signer_must_pay = false;
-            ctx.accounts.manager_slot.as_mut().unwrap().manager = ctx.accounts.manager_nft_metadata.as_ref().unwrap().mint;
-            ctx.accounts.manager_slot.as_mut().unwrap().campaign = ctx.accounts.campaign.key();
+    if ctx.accounts.signer.key() != ctx.accounts.house.house_admin || ctx.accounts.manager_slot.is_some() {
+        if ctx.accounts.house.manager_collection.is_some() && ctx.accounts.manager_nft_token_account.is_some() {
 
+            
+                require!(ctx.accounts.manager_nft_token_account.is_some(), ErrorCodes::ManagerTokenAccountRequired);
+                require!(ctx.accounts.manager_nft_metadata.is_some(), ErrorCodes::MissingMetadata);
+                
+                let token_account = ctx.accounts.manager_nft_token_account.as_ref().unwrap();
+                require!(token_account.owner == ctx.accounts.signer.key(), ErrorCodes::TokenOwnerMismatch);
+                require!(token_account.amount == 1, ErrorCodes::OwnerBalanceMismatch);
+                
+                let metadata = ctx.accounts.manager_nft_metadata.as_ref().unwrap();
+                require!(metadata_is_collection(metadata, &ctx.accounts.house.manager_collection.unwrap()).is_ok(), ErrorCodes::CollectionProofInvalid);
+                require!(ctx.accounts.manager_slot.is_some(), ErrorCodes::InvalidInput);
+                signer_must_pay = false;
+                ctx.accounts.manager_slot.as_mut().unwrap().manager = ctx.accounts.manager_nft_metadata.as_ref().unwrap().mint;
+                ctx.accounts.manager_slot.as_mut().unwrap().campaign = ctx.accounts.campaign.key();
+                ctx.accounts.manager_slot.as_mut().unwrap().house = ctx.accounts.house.key();
+                ctx.accounts.manager_slot.as_mut().unwrap().exit(&crate::id())?;
+                msg!("Manager slot created for campaign: {:#?}", ctx.accounts.manager_slot);
 
+            }
+            else {
+                require!(ctx.accounts.manager_nft_token_account.is_none(), ErrorCodes::InvalidInput);
+                require!(ctx.accounts.manager_nft_metadata.is_none(), ErrorCodes::InvalidInput);
+                require!(ctx.accounts.manager_slot.is_none(), ErrorCodes::InvalidInput);
+                require!(ctx.accounts.creation_fee_account.is_some(), ErrorCodes::InvalidInput);
+            }
         }
-        else {
-            require!(ctx.accounts.manager_nft_token_account.is_none(), ErrorCodes::InvalidInput);
-            require!(ctx.accounts.manager_nft_metadata.is_none(), ErrorCodes::InvalidInput);
-            require!(ctx.accounts.manager_slot.is_none(), ErrorCodes::InvalidInput);
-            require!(ctx.accounts.creation_fee_account.is_some(), ErrorCodes::InvalidInput);
-        }
-    }
     else {
         signer_must_pay = false;
     }
@@ -93,14 +98,19 @@ pub fn create_campaign(ctx: Context<CreateCampaign>,
     campaign.max_rewards_per_game = max_rewards_per_game;
     campaign.rewards_claim_fee = player_claim_price;
     campaign.rewards_available = fund_amount;
-    campaign.manager_mint = None;
+    campaign.manager_identity = match ctx.accounts.manager_nft_metadata.as_ref() {
+        Some(metadata) => PlayerIdentity{identity_type: crate::state::IdentityType::Nft, pubkey: metadata.mint.key()},
+        None => PlayerIdentity{identity_type: crate::state::IdentityType::User, pubkey: ctx.accounts.signer.key()},
+    };
     campaign.player_count = 0;
     campaign.active_games = 0;
     campaign.total_games = 0;
     campaign.unclaimed_sol_fees = 0;
     campaign._reserved_config = [0; 7];
-    campaign._reserved_for_token = [0; 3];
+    campaign._reserved_for_token = [0; 2];
+    campaign._reserved_bytes = [0; 7];
     campaign.reserved_rewards = 0;
+    campaign.burn_remainder = burn_remainder;
 
     ctx.accounts.house.add_campaign();
     let fee = match signer_must_pay {
@@ -199,12 +209,39 @@ pub struct CreateCampaign<'info> {
 
     #[account(
         init,
-        space= 8+32+32,
+        space= 8+32+32+32,
         payer=signer,
-        seeds=[b"manager_slot", manager_nft_metadata.as_ref().unwrap().mint.key().as_ref()], bump,
+        seeds=[b"manager_slot", house.key().as_ref(), manager_nft_metadata.as_ref().unwrap().mint.key().as_ref()], bump,
         constraint = house.manager_collection.is_some() @ ErrorCodes::InvalidInput,
         constraint = metadata_is_collection(&manager_nft_metadata.as_ref().unwrap(),&house.manager_collection.unwrap()).is_ok() @ ErrorCodes::CollectionProofInvalid
         
     )]
     pub manager_slot: Option<Account<'info,ManagerSlot>>,
+
+
+    //// CHECK: Custom validation for mpl-core asset
+    //#[account()]
+    //pub manager_core_nft: Option<AccountInfo<'info>>,
 }
+
+//impl CreateCampaign<'_> {
+//    pub fn validate_core_nft(&self) -> Result<()> {
+//        if let Some(core_nft_info) = &self.manager_core_nft {
+//            let nft = SimplifiedAssetV1::from_account_info(core_nft_info)?;
+//            
+//            if nft.owner != self.signer.key() {
+//                return err!(ErrorCodes::TokenOwnerMismatch);
+//            }
+//            
+//            if let Some(house_manager_collection) = self.house.manager_collection {
+//                if nft.update_authority != UpdateAuthority::Collection(house_manager_collection) {
+//                    return err!(ErrorCodes::OwnerBalanceMismatch);
+//                }
+//            } else {
+//                return err!(ErrorCodes::InvalidInput);
+//            }
+//        }
+//        
+//        Ok(())
+//    }
+//}
